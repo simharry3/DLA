@@ -3,8 +3,8 @@ import bpy
 import sys
 import math
 
-
-input = "/home/quaczar/Documents/RPI/2017/spring/pcomp/project/parallelPlanes/laptopData/l4-128-8192.dat"
+worldsize = 16
+input = "/home/quaczar/Documents/Projects/DLA/planarModel/data/largeRun.dat"
 g = open(input, 'r')
 x = []
 y = []
@@ -29,11 +29,12 @@ for line in g:
 #Clear scene:
 bpy.ops.object.select_by_type(type='MESH')
 bpy.ops.object.delete()
+print("Simulation Bodies in List: ", len(x))
 value = 100
 for i in range(0, value):
-    xV = (x[i]-30) * .95
-    yV = (y[i]-30) * .95
-    zV = (z[i]) * .8
+    xV = (x[i] - (worldsize / 2)) * 1
+    yV = (y[i] - (worldsize / 2)) * 1
+    zV = (z[i]) * 1
 
     print("Object ", i, "/", value)
 
@@ -42,4 +43,5 @@ for i in range(0, value):
     bpy.ops.mesh.primitive_uv_sphere_add(location=origin)
 bpy.ops.object.select_by_type(type='LAMP')
 
-# bpy.ops.object.select_by_type(type='CAMERA')
+bpy.ops.object.select_by_type(type='CAMERA')
+bpy.ops.transform.translate(value=(max(x), min(y), max(z)))
