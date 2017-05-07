@@ -4,7 +4,7 @@ import sys
 import math
 
 worldsize = 16
-input = "/home/quaczar/Documents/Projects/DLA/planarModel/data/largeRun.dat"
+input = "/home/quaczar/Documents/Projects/DLA/planarModel/data/simulation2.dat"
 g = open(input, 'r')
 x = []
 y = []
@@ -30,7 +30,7 @@ for line in g:
 bpy.ops.object.select_by_type(type='MESH')
 bpy.ops.object.delete()
 print("Simulation Bodies in List: ", len(x))
-value = 100
+value = 2000
 for i in range(0, value):
     xV = (x[i] - (worldsize / 2)) * 1
     yV = (y[i] - (worldsize / 2)) * 1
