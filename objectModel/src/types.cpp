@@ -8,12 +8,13 @@ Particle::Particle(int* position){
 
 void Particle::move(int* vec){
     for(int i = 0; i < 3; ++i){
-        this->pos[i] += vec[i];
+        this->pos[i] = vec[i];
     }  
 }
 
 
 Universe::Universe(int size){
+    srand(time(NULL));
     for(int i = 0; i < 3; ++i){
         this->bounds[i] = size;
     }
@@ -22,32 +23,45 @@ Universe::Universe(int size){
 }
 
 void Universe::addParticles(int number){
-    this->particles = number;
-    this->activeParticles = (Particle*)malloc(number * sizeof(Particle));
+    this->numParticles = number;
+    this->numAggregators = 0;
     for(int i = 0; i < number; ++i){
         int location[3] = {rand()%this->bounds[0], rand()%this->bounds[1], rand()%this->bounds[2]};
-        this->activeParticles[i] = Particle(location);
+        this->activeParticles.push_back(Particle(location));
     }
 }
 
 void Universe::moveParticles(){
     int vec[3];
-    for(int i = 0; i < this->particles; ++i){
-        for(int i = 0; i < 3; ++i){
-            vec[i] = rand() % 3 - 1;
+    for(list<Particle>::iterator i = this->activeParticles.begin(); i != this->activeParticles.end(); ++i){
+        for(int j = 0; j < 3; ++j){
+            vec[j] = min(max(rand() % 3 - 1 + i->pos[j], 0), this->bounds[j]);
         }
-        if(this->checkVacant(this->particles[i].pos)
-            this->activeParticles[i].move(vec);
+        if(this->checkVacant(vec)){
+            i->move(vec);
         }
         else{
-            //ADD TO COLLIDED PARTICLES LIST
+            this->aggregators.push_back(*i);
+            this->activeParticles.erase(i);
+            --this->numParticles;
+            ++this->numAggregators;
+            --i;
         }
     }
 }
 
+bool Universe::checkVacant(int* pos){
+    for(list<Particle>::iterator i = this->aggregators.begin(); i != this->aggregators.end(); ++i){
+        if(i->pos[0] == pos[0] && i->pos[1] == pos[1] && i->pos[2] == pos[2]){
+            return false;
+        }
+    }
+    return true;
+}
+
 void Universe::printParticles(){
-    for(int i = 0; i < this->particles; ++i){
-        int* temp = this->activeParticles[i].pos;
+    for(list<Particle>::iterator i = this->activeParticles.begin(); i != this->activeParticles.end(); ++i){
+        int* temp = i->pos;
         printf("(%d, %d, %d)\n", temp[0], temp[1], temp[2]);
     }
 }

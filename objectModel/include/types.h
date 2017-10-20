@@ -1,6 +1,8 @@
 #include <iostream>
-#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <list>
 
 using namespace std;
 
@@ -20,6 +22,7 @@ class Universe{
     
         void moveParticles();
         void checkCollisions();
+        bool checkVacant(int*);
 
         void printParticles();
 
@@ -27,7 +30,10 @@ class Universe{
 
         int bounds[3];
 
-        int particles;
-        Particle* activeParticles;
-        Particle* collidedParticles;
+        int numParticles;
+        int numAggregators;
+
+        //Use lists to enable parallelization later, as container mondification is safe
+        list<Particle> activeParticles;
+        list<Particle> aggregators;
 };
