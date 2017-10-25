@@ -48,6 +48,13 @@ void Universe::addAggregators(char* filename){
     agFile.close();
 }
 
+void Universe::generateAggregators(int num, int bound, int* center){
+    for(int i = 0; i < num; ++i){
+        int location[3] = {rand()%bound + center[0], rand()%bound + center[1], rand()%bound + center[2]};
+        this->aggregators.push_back(Particle(location));
+    }
+}
+
 void Universe::moveParticles(){
     int vec[3];
     for(list<Particle>::iterator i = this->activeParticles.begin(); i != this->activeParticles.end(); ++i){

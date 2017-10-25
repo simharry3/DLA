@@ -112,6 +112,13 @@ void printParticles(){
 
 int initVisualizer(int argc, char** argv){
     glutInit(&argc, argv);
+    
+    return EXIT_SUCCESS;
+}
+
+void* runVisualizer(void* args){
+    printf("Visualizer started successfully\n");
+
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(900, 900);
@@ -125,10 +132,6 @@ int initVisualizer(int argc, char** argv){
     glutIdleFunc(renderScene);
     glutKeyboardFunc(processNormalKeys);
     glutSpecialFunc(processSpecialKeys);
-    return EXIT_SUCCESS;
-}
-
-int runVisualizer(){
     glutMainLoop();
-    return EXIT_SUCCESS;
+    pthread_exit(NULL);
 }
