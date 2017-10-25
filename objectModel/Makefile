@@ -1,9 +1,9 @@
 CC = g++
-CFLAGS = -c -Wall -lGL -lGLU -lglut -Iinclude
+CFLAGS = -c -Wall -lGL -lGLU -lglut -lpthreads -Iinclude
 OBJ = types.o simulation.o visualizer.o
 
 simulation: $(OBJ) 
-	$(CC) $(OBJ) -o $@ -lGL -lGLU -lglut
+	$(CC) $(OBJ) -o $@ -lGL -lGLU -lglut -lpthreads
 	rm *.o
 
 types.o: src/types.cpp include/types.h

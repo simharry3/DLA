@@ -18,6 +18,7 @@ int main(int argc, char* argv[]){
     // }
 
     // u1.writeOutputFile((char*)"output.dat");
-    runVisualizer(argc, argv);
+    tuple<int, char**> args = make_tuple(argc, argv);
+    runVisualizer((void*)args);
     // u1.printParticles();
 }

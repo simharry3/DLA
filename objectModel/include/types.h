@@ -2,6 +2,9 @@
 #define TYPES_H
 #include <iostream>
 #include <fstream>
+#include <tuple>
+
+#include <pthread.h>
 
 #include <stdio.h>
 #include <stdlib.h>
