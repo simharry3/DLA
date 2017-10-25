@@ -3,7 +3,6 @@
 #include <string>
 #include <list>
 #include <vector>
-#include <tuple>
 #include <fstream>
 #include <algorithm>
 #include <math.h>
@@ -11,4 +10,5 @@
 
 using namespace std;
 
-int runVisualizer(void*);
+int initVisualizer(int, char**);
+int runVisualizer();

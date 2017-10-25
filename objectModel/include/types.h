@@ -1,8 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
+
 #include <iostream>
 #include <fstream>
-#include <tuple>
 
 #include <pthread.h>
 

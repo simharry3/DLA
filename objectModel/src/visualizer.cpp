@@ -110,10 +110,8 @@ void printParticles(){
     }
 }
 
-int runVisualizer(void* input){
-    tuple<int, char**> args = (tuple<int, char**>)input;
-    
-    glutInit(args[0], args[1]);
+int initVisualizer(int argc, char** argv){
+    glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(900, 900);
@@ -127,11 +125,10 @@ int runVisualizer(void* input){
     glutIdleFunc(renderScene);
     glutKeyboardFunc(processNormalKeys);
     glutSpecialFunc(processSpecialKeys);
-    // printParticles();
+    return EXIT_SUCCESS;
+}
 
+int runVisualizer(){
     glutMainLoop();
-
-
-
     return EXIT_SUCCESS;
 }

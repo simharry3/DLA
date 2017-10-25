@@ -8,6 +8,7 @@ int main(int argc, char* argv[]){
     Universe u1(universeSize);
     u1.addParticles(numParticles);
     u1.addAggregators((char*)"aggregators.dat");
+    initVisualizer(argc, argv);
     int step = 0;
     // while(u1.numParticles > numParticles * .1){
     //     u1.moveParticles();
@@ -18,7 +19,6 @@ int main(int argc, char* argv[]){
     // }
 
     // u1.writeOutputFile((char*)"output.dat");
-    tuple<int, char**> args = make_tuple(argc, argv);
-    runVisualizer((void*)args);
+    runVisualizer();
     // u1.printParticles();
 }
