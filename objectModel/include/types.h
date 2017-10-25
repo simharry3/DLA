@@ -1,4 +1,8 @@
+#ifndef TYPES_H
+#define TYPES_H
 #include <iostream>
+#include <fstream>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +23,7 @@ class Universe{
         Universe(int size);
 
         void addParticles(int number);
+        void addAggregators(char*);
     
         void moveParticles();
         void checkCollisions();
@@ -26,7 +31,7 @@ class Universe{
 
         void printParticles();
 
-        void writeOutputFile(string filename);
+        void writeOutputFile(char* filename);
 
         int bounds[3];
 
@@ -37,3 +42,4 @@ class Universe{
         list<Particle> activeParticles;
         list<Particle> aggregators;
 };
+#endif
