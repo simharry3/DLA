@@ -62,6 +62,6 @@ bool Universe::checkVacant(int* pos){
 void Universe::printParticles(){
     for(list<Particle>::iterator i = this->activeParticles.begin(); i != this->activeParticles.end(); ++i){
         int* temp = i->pos;
-        printf("(%d, %d, %d)\n", temp[0], temp[1], temp[2]);
+        printf("%d %d %d\n", temp[0], temp[1], temp[2]);
     }
 }
