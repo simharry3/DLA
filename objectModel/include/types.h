@@ -19,10 +19,13 @@ using namespace std;
 class Particle{
     public:
         Particle(int* position);
+        bool operator<(const Particle&) const;
+
+        void encodeLocation(int*);
 
         void move(int* vec);
         int pos[3];
-        uint32_t mortonCode;
+        uint64_t mortonCode;
 };
 
 class Universe{
@@ -34,7 +37,7 @@ class Universe{
         void generateAggregators(int, int, int*);
 
         void generateMortonCodes();
-        
+
         void moveParticles();
         void checkCollisions();
         bool checkVacant(int*);
