@@ -105,3 +105,7 @@ void Universe::writeOutputFile(char* filename){
     }
     outFile.close();
 }
+
+// void Universe::renderUniverse(){
+
+// }

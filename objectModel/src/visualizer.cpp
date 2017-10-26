@@ -7,7 +7,7 @@ float green = 1.0f;
 float blue = 1.0f;
 float lx=0.0f,lz=-1.0f;
 float x=300.0f,y=300.0f,z=300.0f;
-float xc=50.0f, yc=50.0f, zc=50.0f;
+float xc=30.0f, yc=30.0f, zc=30.0f;
 float particleRadius = 1.0f;
 list<vector<int> > particleList;
 
@@ -113,6 +113,14 @@ void printParticles(){
 int initVisualizer(int argc, char** argv){
     glutInit(&argc, argv);
     
+    xc = atoi(argv[1])/2;
+    yc = atoi(argv[1])/2;
+    zc = atoi(argv[1])/2;
+
+    x = (float)atoi(argv[1]) * 4;
+    y = (float)atoi(argv[1]) * 4;
+    z = (float)atoi(argv[1]) * 4;
+
     return EXIT_SUCCESS;
 }
 
@@ -122,7 +130,7 @@ void* runVisualizer(void* args){
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(900, 900);
-    glutCreateWindow("GL WINDOW");
+    glutCreateWindow("DLA Visualizer");
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
