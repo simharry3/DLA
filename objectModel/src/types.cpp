@@ -52,7 +52,12 @@ void Universe::generateAggregators(int num, int bound, int* center){
     for(int i = 0; i < num; ++i){
         int location[3] = {rand()%bound + center[0], rand()%bound + center[1], rand()%bound + center[2]};
         this->aggregators.push_back(Particle(location));
+        ++this->numAggregators;
     }
+}
+
+void Universe::generateMortonCodes(){
+    
 }
 
 void Universe::moveParticles(){
@@ -107,20 +112,19 @@ void Universe::writeOutputFile(char* filename){
 }
 
 void Universe::renderUniverse(){
-    
-    // xc = atoi(argv[1])/2;
-    // yc = atoi(argv[1])/2;
-    // zc = atoi(argv[1])/2;
 
-    // x = (float)atoi(argv[1]) * 4;
-    // y = (float)atoi(argv[1]) * 4;
-    // z = (float)atoi(argv[1]) * 4;
+    pthread_attr_t attr;
 
-    pthread_t visualizer;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
     int rc;
-    rc = pthread_create(&visualizer, NULL, runVisualizer, this);
+    rc = pthread_create(&(this->visualizerThread), NULL, runVisualizer, (void*)this);
     if(rc){
         fprintf(stderr, "Unable to start visualizer\n");
         exit(-1);
     }
+
+    pthread_attr_destroy(&attr);
+    // pthread_exit(NULL);
 }

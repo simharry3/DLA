@@ -11,13 +11,13 @@ float xc=30.0f, yc=30.0f, zc=30.0f;
 float particleRadius = 1.0f;
 list<vector<int> > particleList;
 
-Universe* univ;
+Universe* univ = NULL;
 
-string renderMode = "solid";
+string renderMode = "single";
+bool showBoundingBox = false;
+bool rotation = true;
 
 void readInputFile(char* filename){
-    
-    int numParticles;
     ifstream dataFile;
     dataFile.open(filename);
     if(!dataFile){
@@ -64,12 +64,19 @@ void drawParticle(int type){
     else{
         glColor3f(0.0f, 1.0f, 0.0f);
     }
-    if(renderMode == "solid"){
+    if(renderMode == "single"){
         glColor3f(1.0f, 1.0f, 1.0f);
         glutSolidSphere(particleRadius, 10, 10);
     }
     else{
-        glutWireSphere(particleRadius, 10, 10);
+        glutSolidSphere(particleRadius, 10, 10);
+    }
+}
+
+void drawBoundingBox(){
+    if(showBoundingBox){
+        glColor3f(0.7f, 0.7f, 0.7f);
+        glutWireCube((univ->bounds[0] * particleRadius + particleRadius) * 2);
     }
 }
 
@@ -92,7 +99,8 @@ void renderScene(void){
     gluLookAt(  x, y, z,
                 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f);
-    glRotatef(angle, 0.0f, 1.0f, 0.0f);     
+    glRotatef(angle, 0.0f, 1.0f, 0.0f);
+    drawBoundingBox();     
     for(list<vector<int> >::iterator i = particleList.begin(); i != particleList.end(); ++i){
         glPushMatrix();
         glTranslatef(((*i)[0]-xc)*particleRadius*2 + particleRadius, ((*i)[1]-yc)*particleRadius*2 + particleRadius, ((*i)[2]-zc)*particleRadius*2 + particleRadius);
@@ -100,7 +108,9 @@ void renderScene(void){
         glPopMatrix();   
     }
 
-    angle -= 0.5f;
+    if(rotation){
+        angle -= 0.5f;
+    }
 
     glutSwapBuffers();
 }
@@ -114,13 +124,19 @@ void processNormalKeys(unsigned char key, int x, int y){
 void processSpecialKeys(int key, int x, int y){
     switch(key){
         case GLUT_KEY_F1:
-            if(renderMode == "wireframe"){
-                renderMode = "solid";
+            if(renderMode == "dual"){
+                renderMode = "single";
             }
             else{
-                renderMode = "wireframe";
+                renderMode = "dual";
             
             }
+            break;
+        case GLUT_KEY_F2:
+            showBoundingBox = !showBoundingBox;
+            break;
+        case GLUT_KEY_F3:
+            rotation = !rotation;
             break;
     }
 
@@ -130,13 +146,6 @@ void printParticles(){
     for(list<vector<int> >::iterator i = particleList.begin(); i != particleList.end(); ++i){
        printf("%d %d %d\n", (*i)[0], (*i)[1], (*i)[2]); 
     }
-}
-
-int initVisualizer(int argc, char** argv){
-    // glutInit(&argc, argv);
-
-
-    return EXIT_SUCCESS;
 }
 
 void* runVisualizer(void* uni){
@@ -169,5 +178,4 @@ void* runVisualizer(void* uni){
     glutKeyboardFunc(processNormalKeys);
     glutSpecialFunc(processSpecialKeys);
     glutMainLoop();
-    pthread_exit(NULL);
 }

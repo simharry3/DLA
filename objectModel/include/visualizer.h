@@ -11,5 +11,4 @@
 
 using namespace std;
 
-int initVisualizer(int, char**);
 void* runVisualizer(void* args);

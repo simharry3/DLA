@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include <pthread.h>
+#include <unistd.h>
 
 #include "visualizer.h"
 
@@ -21,6 +22,7 @@ class Particle{
 
         void move(int* vec);
         int pos[3];
+        uint32_t mortonCode;
 };
 
 class Universe{
@@ -31,6 +33,8 @@ class Universe{
         void addAggregators(char*);
         void generateAggregators(int, int, int*);
 
+        void generateMortonCodes();
+        
         void moveParticles();
         void checkCollisions();
         bool checkVacant(int*);
@@ -38,7 +42,6 @@ class Universe{
         void printParticles();
 
         void writeOutputFile(char* filename);
-
 
         void renderUniverse();
 
@@ -50,5 +53,7 @@ class Universe{
         //Use lists to enable parallelization later, as container mondification is safe
         list<Particle> activeParticles;
         list<Particle> aggregators;
+
+        pthread_t visualizerThread;
 };
 #endif
