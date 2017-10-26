@@ -6,6 +6,8 @@
 
 #include <pthread.h>
 
+#include "visualizer.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,6 +38,9 @@ class Universe{
         void printParticles();
 
         void writeOutputFile(char* filename);
+
+
+        void renderUniverse();
 
         int bounds[3];
 

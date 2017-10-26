@@ -106,6 +106,21 @@ void Universe::writeOutputFile(char* filename){
     outFile.close();
 }
 
-// void Universe::renderUniverse(){
+void Universe::renderUniverse(){
+    
+    // xc = atoi(argv[1])/2;
+    // yc = atoi(argv[1])/2;
+    // zc = atoi(argv[1])/2;
 
-// }
+    // x = (float)atoi(argv[1]) * 4;
+    // y = (float)atoi(argv[1]) * 4;
+    // z = (float)atoi(argv[1]) * 4;
+
+    pthread_t visualizer;
+    int rc;
+    rc = pthread_create(&visualizer, NULL, runVisualizer, this);
+    if(rc){
+        fprintf(stderr, "Unable to start visualizer\n");
+        exit(-1);
+    }
+}

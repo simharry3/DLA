@@ -11,6 +11,8 @@ float xc=30.0f, yc=30.0f, zc=30.0f;
 float particleRadius = 1.0f;
 list<vector<int> > particleList;
 
+Universe* univ;
+
 string renderMode = "solid";
 
 void readInputFile(char* filename){
@@ -35,6 +37,25 @@ void readInputFile(char* filename){
     dataFile.close();
 }
 
+void readUniverseData(){
+    particleList.clear();
+    for(list<Particle>::iterator i = univ->aggregators.begin(); i != univ->aggregators.end(); ++i){
+        vector<int> tempVec;
+        tempVec.push_back(i->pos[0]);
+        tempVec.push_back(i->pos[1]);
+        tempVec.push_back(i->pos[2]);
+        tempVec.push_back(0);
+        particleList.push_back(tempVec);
+    }
+    for(list<Particle>::iterator i = univ->activeParticles.begin(); i != univ->activeParticles.end(); ++i){
+        vector<int> tempVec;
+        tempVec.push_back(i->pos[0]);
+        tempVec.push_back(i->pos[1]);
+        tempVec.push_back(i->pos[2]);
+        tempVec.push_back(1);
+        particleList.push_back(tempVec);
+    }
+}
 
 void drawParticle(int type){
     if(type == 0){
@@ -63,7 +84,8 @@ void changeSize(int w, int h){
 }
 
 void renderScene(void){
-    readInputFile((char*)"output.dat");
+    readUniverseData();
+    // readInputFile((char*)"output.dat");
     glMatrixMode(GL_MODELVIEW);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();   
@@ -111,20 +133,26 @@ void printParticles(){
 }
 
 int initVisualizer(int argc, char** argv){
-    glutInit(&argc, argv);
-    
-    xc = atoi(argv[1])/2;
-    yc = atoi(argv[1])/2;
-    zc = atoi(argv[1])/2;
+    // glutInit(&argc, argv);
 
-    x = (float)atoi(argv[1]) * 4;
-    y = (float)atoi(argv[1]) * 4;
-    z = (float)atoi(argv[1]) * 4;
 
     return EXIT_SUCCESS;
 }
 
-void* runVisualizer(void* args){
+void* runVisualizer(void* uni){
+    univ = (Universe*) uni;
+    int argc = 1;
+    char* argv[1] = {""};
+    glutInit(&argc, argv);
+
+    xc = univ->bounds[0]/2;
+    yc = univ->bounds[1]/2;
+    zc = univ->bounds[2]/2;
+
+    x = (float)univ->bounds[0] * 4;
+    y = (float)univ->bounds[1] * 4;
+    z = (float)univ->bounds[2] * 4;
+
     printf("Visualizer started successfully\n");
 
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
