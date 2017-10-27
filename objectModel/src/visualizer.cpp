@@ -16,6 +16,7 @@ Universe* univ = NULL;
 string renderMode = "single";
 bool showBoundingBox = false;
 bool rotation = true;
+bool showActive = true;
 
 void readInputFile(char* filename){
     ifstream dataFile;
@@ -57,6 +58,48 @@ void readUniverseData(){
     }
 }
 
+void printText(float x, float y, float* color, string text){
+    int winWidth = glutGet(GLUT_WINDOW_WIDTH);
+    int winHeight = glutGet(GLUT_WINDOW_HEIGHT);
+    // x *= winWidth;
+    // y *= winWidth;
+    int len = text.length();
+    glColor3f(color[0], color[1], color[2]);
+
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0.0, winWidth, 0.0, winHeight);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glRasterPos2i(x, y);
+
+    for(string::iterator i = text.begin(); i != text.end(); ++i){
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *i);
+    }
+
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+}
+
+void drawStatsBox(float x, float y, float* color){
+    int winWidth = glutGet(GLUT_WINDOW_WIDTH);
+    int winHeight = glutGet(GLUT_WINDOW_HEIGHT);
+    // x *= winWidth;
+    // y *= winWidth;
+
+    glColor3f(color[0], color[1], color[2]);
+    ostringstream text;
+    text << "Active Particles: " << univ->numParticles;
+    printText(x + 10, y + 10, color, text.str());
+    text.str(string());
+    text << "Aggregator Particles: " << univ->numAggregators;
+    printText(x + 10, y + 35, color, text.str());
+}
+
 void drawParticle(int type){
     if(type == 0){
         glColor3f(1.0f, 0.0f, 0.0f);
@@ -95,18 +138,26 @@ void renderScene(void){
     // readInputFile((char*)"output.dat");
     glMatrixMode(GL_MODELVIEW);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity();   
+    glLoadIdentity();  
     gluLookAt(  x, y, z,
                 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f);
     glRotatef(angle, 0.0f, 1.0f, 0.0f);
     drawBoundingBox();     
     for(list<vector<int> >::iterator i = particleList.begin(); i != particleList.end(); ++i){
-        glPushMatrix();
-        glTranslatef(((*i)[0]-xc)*particleRadius*2 + particleRadius, ((*i)[1]-yc)*particleRadius*2 + particleRadius, ((*i)[2]-zc)*particleRadius*2 + particleRadius);
-        drawParticle((*i)[3]);
-        glPopMatrix();   
+            if(!showActive && (*i)[3] == 1){
+                continue;
+            }
+            glPushMatrix();
+            glTranslatef(((*i)[0]-xc)*particleRadius*2 + particleRadius, ((*i)[1]-yc)*particleRadius*2 + particleRadius, ((*i)[2]-zc)*particleRadius*2 + particleRadius);
+            drawParticle((*i)[3]);
+            glPopMatrix();
     }
+
+
+    float color[3] = {0.5f, 0.5f, 0.5f};
+    printText(10, 10, color, "ESC - Exit   |   F1 - Render Mode   |   F2 - Bounding Box   |   F3 - Rotation"); 
+    drawStatsBox(10, glutGet(GLUT_WINDOW_HEIGHT) - 60 , color);
 
     if(rotation){
         angle -= 0.5f;
@@ -138,6 +189,8 @@ void processSpecialKeys(int key, int x, int y){
         case GLUT_KEY_F3:
             rotation = !rotation;
             break;
+        case GLUT_KEY_F4:
+            showActive = !showActive;
     }
 
 }
