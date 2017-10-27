@@ -14,6 +14,7 @@ int main(int argc, char* argv[]){
     center[1] = u1->bounds[1] - 3;
     center[2] = u1->bounds[2] - 3;
     u1->generateAggregators(1, 1, center);
+    u1->reserveMemory();
 
     u1->renderUniverse();
     
@@ -22,7 +23,7 @@ int main(int argc, char* argv[]){
         u1->generateMortonCodes();
         u1->moveParticles();
         ++step;
-        printf("STEP %d | ACTIVE: %d | AGGREGATORS: %d\n", step, u1->numParticles, u1->numAggregators);
+        // printf("STEP %d | ACTIVE: %d | AGGREGATORS: %d\n", step, u1->numParticles, u1->numAggregators);
         // u1.writeOutputFile((char*)"output.dat");
         // sleep(1);
     }

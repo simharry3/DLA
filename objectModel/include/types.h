@@ -38,6 +38,7 @@ class Universe{
         void addParticles(int number);
         void addAggregators(char*);
         void generateAggregators(int, int, int*);
+        void reserveMemory();
 
         void generateMortonCodes();
 

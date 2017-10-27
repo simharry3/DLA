@@ -1,7 +1,7 @@
 #include "visualizer.h"
 
 
-float angle = 1.0f;
+float angle = 90.0f;
 float red = 1.0f;
 float green = 1.0f;
 float blue = 1.0f;
@@ -9,14 +9,16 @@ float lx=0.0f,lz=-1.0f;
 float x=300.0f,y=300.0f,z=300.0f;
 float xc=30.0f, yc=30.0f, zc=30.0f;
 float particleRadius = 1.0f;
+float pointSize = 0.2f;
 list<vector<int> > particleList;
 
 Universe* univ = NULL;
 
-string renderMode = "single";
+string renderMode = "fast";
 bool showBoundingBox = false;
-bool rotation = true;
+bool rotation = false;
 bool showActive = true;
+bool smoothing = false;
 
 void readInputFile(char* filename){
     ifstream dataFile;
@@ -40,11 +42,12 @@ void readInputFile(char* filename){
 
 void readUniverseData(){
     particleList.clear();
-    for(vector<Particle>::iterator i = univ->aggregators.begin(); i != univ->aggregators.end(); ++i){
+
+    for(int i = 0; i < univ->startingAggregators; ++i){
         vector<int> tempVec;
-        tempVec.push_back(i->pos[0]);
-        tempVec.push_back(i->pos[1]);
-        tempVec.push_back(i->pos[2]);
+        tempVec.push_back(univ->aggregators[i].pos[0]);
+        tempVec.push_back(univ->aggregators[i].pos[1]);
+        tempVec.push_back(univ->aggregators[i].pos[2]);
         tempVec.push_back(0);
         particleList.push_back(tempVec);
     }
@@ -107,12 +110,16 @@ void drawParticle(int type){
     else{
         glColor3f(0.0f, 1.0f, 0.0f);
     }
-    if(renderMode == "single"){
+    if(renderMode == "fancy"){
         glColor3f(1.0f, 1.0f, 1.0f);
         glutSolidSphere(particleRadius, 10, 10);
     }
     else{
-        glutSolidSphere(particleRadius, 10, 10);
+        glPointSize(pointSize);
+        glBegin(GL_POINTS);
+            glVertex2f(0.0, 0.0);
+        glEnd();
+        // glutSolidSphere(particleRadius, 10, 10);
     }
 }
 
@@ -156,7 +163,7 @@ void renderScene(void){
 
 
     float color[3] = {0.5f, 0.5f, 0.5f};
-    printText(10, 10, color, "ESC - Exit   |   F1 - Render Mode   |   F2 - Bounding Box   |   F3 - Rotation"); 
+    printText(10, 10, color,    "ESC - Exit   |   F1 - Mode   |   F2 - Bounds   |   F3 - Rotation   |   F4 - Active"); 
     drawStatsBox(10, glutGet(GLUT_WINDOW_HEIGHT) - 60 , color);
 
     if(rotation){
@@ -175,11 +182,11 @@ void processNormalKeys(unsigned char key, int x, int y){
 void processSpecialKeys(int key, int x, int y){
     switch(key){
         case GLUT_KEY_F1:
-            if(renderMode == "dual"){
-                renderMode = "single";
+            if(renderMode == "fast"){
+                renderMode = "fancy";
             }
             else{
-                renderMode = "dual";
+                renderMode = "fast";
             
             }
             break;
@@ -191,6 +198,7 @@ void processSpecialKeys(int key, int x, int y){
             break;
         case GLUT_KEY_F4:
             showActive = !showActive;
+            break;
     }
 
 }

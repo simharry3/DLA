@@ -91,6 +91,10 @@ void Universe::generateAggregators(int num, int bound, int* center){
     }
 }
 
+void Universe::reserveMemory(){
+    this->aggregators.reserve(this->numParticles + this->numAggregators);
+}
+
 void Universe::generateMortonCodes(){
     for(vector<Particle>::iterator i = this->aggregators.begin(); i != this->aggregators.end(); ++i){
         i->encodeLocation(this->bounds);
@@ -101,19 +105,20 @@ void Universe::generateMortonCodes(){
 void Universe::moveParticles(){
     int vec[3];
     this->startingAggregators = this->numAggregators;
-    for(list<Particle>::iterator i = this->activeParticles.begin(); i != this->activeParticles.end(); ++i){
+    list<Particle>::iterator i = this->activeParticles.begin();
+    while(i != this->activeParticles.end()){
         for(int j = 0; j < 3; ++j){
             vec[j] = min(max(rand() % 3 - 1 + i->pos[j], 0), this->bounds[j]);
         }
         if(this->checkVacant(vec)){
             i->move(vec);
+            ++i;
         }
         else{
             this->aggregators.push_back(*i);
-            this->activeParticles.erase(i);
+            i = this->activeParticles.erase(i);
             --this->numParticles;
             ++this->numAggregators;
-            --i;
         }
     }
 }
