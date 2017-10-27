@@ -4,11 +4,14 @@ Particle::Particle(int* position){
     for(int i = 0; i < 3; ++i){
         this->pos[i] = position[i];
     }
-    // this->encodeLocation();
+    this->mortonCode = 0;
 }
 
 bool Particle::operator<(const Particle& p) const{
     return this->mortonCode < p.mortonCode;
+}
+bool Particle::operator<(const uint64_t v) const{
+    return this->mortonCode < v;
 }
 
 void Particle::move(int* vec){
@@ -89,13 +92,15 @@ void Universe::generateAggregators(int num, int bound, int* center){
 }
 
 void Universe::generateMortonCodes(){
-    for(list<Particle>::iterator i = this->aggregators.begin(); i != this->aggregators.end(); ++i){
+    for(vector<Particle>::iterator i = this->aggregators.begin(); i != this->aggregators.end(); ++i){
         i->encodeLocation(this->bounds);
     }
+    sort(this->aggregators.begin(), this->aggregators.end());
 }
 
 void Universe::moveParticles(){
     int vec[3];
+    this->startingAggregators = this->numAggregators;
     for(list<Particle>::iterator i = this->activeParticles.begin(); i != this->activeParticles.end(); ++i){
         for(int j = 0; j < 3; ++j){
             vec[j] = min(max(rand() % 3 - 1 + i->pos[j], 0), this->bounds[j]);
@@ -114,12 +119,9 @@ void Universe::moveParticles(){
 }
 
 bool Universe::checkVacant(int* pos){
-    for(list<Particle>::iterator i = this->aggregators.begin(); i != this->aggregators.end(); ++i){
-        if(i->pos[0] == pos[0] && i->pos[1] == pos[1] && i->pos[2] == pos[2]){
-            return false;
-        }
-    }
-    return true;
+    Particle testParticle = Particle(pos);
+    testParticle.encodeLocation(this->bounds);
+    return(!binary_search(this->aggregators.begin(), this->aggregators.begin() + this->startingAggregators, testParticle));
 }
 
 void Universe::printParticles(){
@@ -136,7 +138,7 @@ void Universe::writeOutputFile(char* filename){
         fprintf(stderr, "FAILED TO OPEN OUTPUT FILE\n");
         exit(1);
     }
-    for(list<Particle>::iterator i = this->aggregators.begin(); i != this->aggregators.end(); ++i){
+    for(vector<Particle>::iterator i = this->aggregators.begin(); i != this->aggregators.end(); ++i){
         outFile << 0 << ' ' << i->pos[0] << ' ' << i->pos[1] << ' ' << i->pos[2] << '\n'; 
     }
     for(list<Particle>::iterator i = this->activeParticles.begin(); i != this->activeParticles.end(); ++i){

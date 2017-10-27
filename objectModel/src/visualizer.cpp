@@ -39,7 +39,7 @@ void readInputFile(char* filename){
 
 void readUniverseData(){
     particleList.clear();
-    for(list<Particle>::iterator i = univ->aggregators.begin(); i != univ->aggregators.end(); ++i){
+    for(vector<Particle>::iterator i = univ->aggregators.begin(); i != univ->aggregators.end(); ++i){
         vector<int> tempVec;
         tempVec.push_back(i->pos[0]);
         tempVec.push_back(i->pos[1]);

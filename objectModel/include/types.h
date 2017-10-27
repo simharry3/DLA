@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <list>
+#include <vector>
 
 using namespace std;
 
@@ -20,6 +21,7 @@ class Particle{
     public:
         Particle(int* position);
         bool operator<(const Particle&) const;
+        bool operator<(const uint64_t) const;
 
         void encodeLocation(int*);
 
@@ -52,10 +54,13 @@ class Universe{
 
         int numParticles;
         int numAggregators;
+        int startingAggregators;
 
         //Use lists to enable parallelization later, as container mondification is safe
         list<Particle> activeParticles;
-        list<Particle> aggregators;
+        vector<Particle> collisions;
+        //Use vector for aggregators, since deletions do not occur, and so we can binary search
+        vector<Particle> aggregators;
 
         pthread_t visualizerThread;
 };
