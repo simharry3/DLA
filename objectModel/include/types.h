@@ -54,6 +54,8 @@ class Universe{
 
         int bounds[3];
 
+        bool aggregatorLock;
+        bool activeParticleLock;
         int numParticles;
         int numAggregators;
         int startingAggregators;

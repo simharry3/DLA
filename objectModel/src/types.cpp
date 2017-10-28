@@ -50,6 +50,8 @@ void Particle::encodeLocation(int* bounds){
 
 Universe::Universe(int size){
     srand(time(NULL));
+    this->aggregatorLock = false;
+    this->activeParticleLock = false;
     this->numParticles = 0;
     this->numAggregators = 0;
     for(int i = 0; i < 3; ++i){
@@ -84,11 +86,14 @@ void Universe::addAggregators(char* filename){
 }
 
 void Universe::generateAggregators(int num, int bound, int* center){
+    while(this->aggregatorLock);
+    this->aggregatorLock = true;
     for(int i = 0; i < num; ++i){
         int location[3] = {rand()%bound + center[0], rand()%bound + center[1], rand()%bound + center[2]};
         this->aggregators.push_back(Particle(location));
         ++this->numAggregators;
     }
+    this->aggregatorLock = false;
 }
 
 void Universe::reserveMemory(){
@@ -105,6 +110,9 @@ void Universe::generateMortonCodes(){
 void Universe::moveParticles(){
     int vec[3];
     this->startingAggregators = this->numAggregators;
+    while(this->aggregatorLock || this->activeParticleLock);
+    this->aggregatorLock = true;
+    this->activeParticleLock = true;
     list<Particle>::iterator i = this->activeParticles.begin();
     while(i != this->activeParticles.end()){
         for(int j = 0; j < 3; ++j){
@@ -121,6 +129,8 @@ void Universe::moveParticles(){
             ++this->numAggregators;
         }
     }
+    this->aggregatorLock = false;
+    this->activeParticleLock = false;
 }
 
 bool Universe::checkVacant(int* pos){

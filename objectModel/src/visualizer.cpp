@@ -41,8 +41,10 @@ void readInputFile(char* filename){
 }
 
 void readUniverseData(){
+    while(univ->activeParticleLock || univ->aggregatorLock);
+    univ->activeParticleLock = true;
+    univ->aggregatorLock = true;
     particleList.clear();
-
     for(int i = 0; i < univ->startingAggregators; ++i){
         vector<int> tempVec;
         tempVec.push_back(univ->aggregators[i].pos[0]);
@@ -59,6 +61,8 @@ void readUniverseData(){
         tempVec.push_back(1);
         particleList.push_back(tempVec);
     }
+    univ->activeParticleLock = false;
+    univ->aggregatorLock = false;
 }
 
 void printText(float x, float y, float* color, string text){
