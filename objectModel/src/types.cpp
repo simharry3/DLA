@@ -1,54 +1,60 @@
-#include <types.h>
+#include "types.h"
 
 using namespace std;
 
+
+//PARTICLE://////////////////////////////////////////////////////////////////
 Particle::Particle(int* position){
-    for(int i = 0; i < 3; ++i){
-        this->pos[i] = position[i];
-    }
-    this->mortonCode = 0;
-    particleLock = false;
+    setPosition(position);
+    setMortonCode(0);
 }
 
 bool Particle::operator<(const Particle& p) const{
-    return this->mortonCode < p.mortonCode;
+    return this->getMortonCode() < p.getMortonCode();
 }
 bool Particle::operator<(const uint64_t v) const{
-    return this->mortonCode < v;
+    return this->getMortonCode() < v;
 }
 
-void Particle::move(int* vec){
+void Particle::setPosition(int* loc){
     for(int i = 0; i < 3; ++i){
-        this->pos[i] = vec[i];
+        position_[i] = loc[i];
     }  
 }
 
-void Particle::encodeLocation(int* bounds){
-    this->mortonCode = encodePosition(  (float)this->pos[0]/bounds[0], 
-                                        (float)this->pos[1]/bounds[1], 
-                                        (float)this->pos[2]/bounds[2]);
-    
+void Particle::encodeLocation(const int* bounds){
+    const int* pos = getPosition();
+    setMortonCode(encodePosition((float)pos[0]/bounds[0], 
+                                (float)pos[1]/bounds[1], 
+                                (float)pos[2]/bounds[2]));
 }
+//////////////////////////////////////////////////////////////////////////////
 
 
+//UNIVERSE:///////////////////////////////////////////////////////////////////
 Universe::Universe(int size){
     srand(time(NULL));
-    this->aggregatorLock = false;
-    this->activeParticleLock = false;
-    this->numParticles = 0;
-    this->numAggregators = 0;
+    this->aggregatorLock_ = false;
+    this->activeParticleLock_ = false;
+    this->numActiveParticles_ = 0;
+    this->numAggregators_ = 0;
     for(int i = 0; i < 3; ++i){
-        this->bounds[i] = size;
+        this->bounds_[i] = size;
     }
     printf("SIMULATION BOUNDS: (%d, %d, %d)\n", 
-                this->bounds[0], this->bounds[1], this->bounds[2]);
+                this->bounds_[0], this->bounds_[1], this->bounds_[2]);
+}
+
+Universe::~Universe(){
+    pthread_join(this->visualizerThread_, NULL);
+    pthread_exit(NULL);
 }
 
 void Universe::addParticles(int number){
-    this->numParticles = number;
+    this->numActiveParticles_ = number;
     for(int i = 0; i < number; ++i){
-        int location[3] = {rand()%this->bounds[0], rand()%this->bounds[1], rand()%this->bounds[2]};
-        this->activeParticles.push_back(Particle(location));
+        int location[3] = {rand()%this->bounds_[0], rand()%this->bounds_[1], rand()%this->bounds_[2]};
+        this->activeParticles_.push_back(Particle(location));
     }
 }
 
@@ -62,70 +68,70 @@ void Universe::addAggregators(char* filename){
     int xi, yi, zi;
     while(agFile >> xi >> yi >> zi){
         int location[3] = {xi, yi, zi};
-        this->aggregators.push_back(Particle(location));
-        ++this->numAggregators;
+        this->aggregators_.push_back(Particle(location));
+        ++this->numAggregators_;
     }
     agFile.close();
 }
 
 void Universe::generateAggregators(int num, int bound, int* center){
-    while(this->aggregatorLock);
-    this->aggregatorLock = true;
+    this->lockAggregators();
     for(int i = 0; i < num; ++i){
         int location[3] = {rand()%bound + center[0], rand()%bound + center[1], rand()%bound + center[2]};
-        this->aggregators.push_back(Particle(location));
-        ++this->numAggregators;
+        this->aggregators_.push_back(Particle(location));
+        ++this->numAggregators_;
     }
-    this->aggregatorLock = false;
+    this->releaseAggregatorLock();
 }
 
 void Universe::reserveMemory(){
-    this->aggregators.reserve(this->numParticles + this->numAggregators);
+    this->aggregators_.reserve(this->numActiveParticles_ + this->numAggregators_);
 }
 
 void Universe::generateMortonCodes(){
-    for(vector<Particle>::iterator i = this->aggregators.begin(); i != this->aggregators.end(); ++i){
-        i->encodeLocation(this->bounds);
+    for(vector<Particle>::iterator i = this->aggregators_.begin(); i != this->aggregators_.end(); ++i){
+        i->encodeLocation(this->bounds_);
     }
-    sort(this->aggregators.begin(), this->aggregators.end());
+    sort(this->aggregators_.begin(), this->aggregators_.end());
 }
 
 void Universe::moveParticles(){
     int vec[3];
-    this->startingAggregators = this->numAggregators;
-    while(this->aggregatorLock);
-    this->aggregatorLock = true;
-    this->activeParticleLock = true;
-    list<Particle>::iterator i = this->activeParticles.begin();
-    while(i != this->activeParticles.end()){
-        for(int j = 0; j < 3; ++j){
-            vec[j] = min(max(rand() % 3 - 1 + i->pos[j], 0), this->bounds[j]);
+    this->startingAggregators_ = this->numAggregators_;
+    this->lockActiveParticles();
+    this->lockAggregators();
+    const int* pos;
+    list<Particle>::iterator i = this->activeParticles_.begin();
+    while(i != this->activeParticles_.end()){
+        pos = i->getPosition();
+        for(int j = 0; j < 3; ++j){           
+            vec[j] = min(max(rand() % 3 - 1 + pos[j], 0), this->bounds_[j]);
         }
         if(this->checkVacant(vec)){
-            i->move(vec);
+            i->setPosition(vec);
             ++i;
         }
         else{
-            this->aggregators.push_back(*i);
-            i = this->activeParticles.erase(i);
-            --this->numParticles;
-            ++this->numAggregators;
+            this->aggregators_.push_back(*i);
+            i = this->activeParticles_.erase(i);
+            --this->numActiveParticles_;
+            ++this->numAggregators_;
         }
     }
-    this->aggregatorLock = false;
-    this->activeParticleLock = false;
+    this->releaseActiveParticleLock();
+    this->releaseAggregatorLock();
 }
 
 bool Universe::checkVacant(int* pos){
     Particle testParticle = Particle(pos);
-    testParticle.encodeLocation(this->bounds);
-    return(!binary_search(this->aggregators.begin(), this->aggregators.begin() + this->startingAggregators, testParticle));
+    testParticle.encodeLocation(this->bounds_);
+    return(!binary_search(this->aggregators_.begin(), this->aggregators_.begin() + this->startingAggregators_, testParticle));
 }
 
 void Universe::printParticles(){
-    for(list<Particle>::iterator i = this->activeParticles.begin(); i != this->activeParticles.end(); ++i){
-        int* temp = i->pos;
-        printf("%d %d %d\n", temp[0], temp[1], temp[2]);
+    for(list<Particle>::iterator i = this->activeParticles_.begin(); i != this->activeParticles_.end(); ++i){
+        const int* pos = i->getPosition();
+        printf("%d %d %d\n", pos[0], pos[1], pos[2]);
     }
 }
 
@@ -136,13 +142,44 @@ void Universe::writeOutputFile(char* filename){
         fprintf(stderr, "FAILED TO OPEN OUTPUT FILE\n");
         exit(1);
     }
-    for(vector<Particle>::iterator i = this->aggregators.begin(); i != this->aggregators.end(); ++i){
-        outFile << 0 << ' ' << i->pos[0] << ' ' << i->pos[1] << ' ' << i->pos[2] << '\n'; 
+    const int* pos;
+    for(vector<Particle>::iterator i = this->aggregators_.begin(); i != this->aggregators_.end(); ++i){
+        pos = i->getPosition();
+        outFile << 0 << ' ' << pos[0] << ' ' << pos[1] << ' ' << pos[2] << '\n'; 
     }
-    for(list<Particle>::iterator i = this->activeParticles.begin(); i != this->activeParticles.end(); ++i){
-        outFile << 1 << ' ' << i->pos[0] << ' ' << i->pos[1] << ' ' << i->pos[2] << '\n'; 
+    for(list<Particle>::iterator i = this->activeParticles_.begin(); i != this->activeParticles_.end(); ++i){
+        pos = i->getPosition();
+        outFile << 1 << ' ' << pos[0] << ' ' << pos[1] << ' ' << pos[2] << '\n'; 
     }
     outFile.close();
+}
+
+list<vector<int> >* Universe::generateOutputList(){
+    list<vector<int> >* outputList = new list<vector<int> >;
+    this->lockActiveParticles();
+    this->lockAggregators();
+    const int* pos;
+    for(int i = 0; i < this->getNumAggregators(); ++i){
+        pos = this->aggregators_[i].getPosition();
+        vector<int> tempVec;
+        tempVec.push_back(pos[0]);
+        tempVec.push_back(pos[1]);
+        tempVec.push_back(pos[2]);
+        tempVec.push_back(0);
+        outputList->push_back(tempVec);
+    }
+    for(list<Particle>::iterator i = this->activeParticles_.begin(); i != this->activeParticles_.end(); ++i){
+        pos = i->getPosition();
+        vector<int> tempVec;
+        tempVec.push_back(pos[0]);
+        tempVec.push_back(pos[1]);
+        tempVec.push_back(pos[2]);
+        tempVec.push_back(1);
+        outputList->push_back(tempVec);
+    }
+    this->releaseActiveParticleLock();
+    this->releaseAggregatorLock();
+    return(outputList);
 }
 
 void Universe::renderUniverse(){
@@ -153,7 +190,7 @@ void Universe::renderUniverse(){
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     int rc;
-    rc = pthread_create(&(this->visualizerThread), NULL, runVisualizer, (void*)this);
+    rc = pthread_create(&(this->visualizerThread_), NULL, runVisualizer, (void*)this);
     if(rc){
         fprintf(stderr, "Unable to start visualizer\n");
         exit(-1);

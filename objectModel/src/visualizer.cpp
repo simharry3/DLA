@@ -8,7 +8,7 @@ float x=300.0f,y=300.0f,z=300.0f;
 float xc=30.0f, yc=30.0f, zc=30.0f;
 float particleRadius = 1.0f;
 float pointSize = 0.2f;
-list<vector<int> > particleList;
+list<vector<int> >* particleList;
 
 Universe* univ = NULL;
 
@@ -19,49 +19,29 @@ bool showActive = true;
 bool smoothing = false;
 
 
-void readInputFile(char* filename){
-    ifstream dataFile;
-    dataFile.open(filename);
-    if(!dataFile){
-        fprintf(stderr, "UNABLE TO OPEN FILE");
-        exit(1);
-    }
-    int type,xin,yin,zin;
-    particleList.clear();
-    while(dataFile >> type >> xin >> yin >> zin){
-        vector<int> tempVec;
-        tempVec.push_back(xin);
-        tempVec.push_back(yin);
-        tempVec.push_back(zin);
-        tempVec.push_back(type);
-        particleList.push_back(tempVec);
-    }
-    dataFile.close();
-}
+// void readInputFile(char* filename){
+//     ifstream dataFile;
+//     dataFile.open(filename);
+//     if(!dataFile){
+//         fprintf(stderr, "UNABLE TO OPEN FILE");
+//         exit(1);
+//     }
+//     int type,xin,yin,zin;
+//     particleList.clear();
+//     while(dataFile >> type >> xin >> yin >> zin){
+//         vector<int> tempVec;
+//         tempVec.push_back(xin);
+//         tempVec.push_back(yin);
+//         tempVec.push_back(zin);
+//         tempVec.push_back(type);
+//         particleList.push_back(tempVec);
+//     }
+//     dataFile.close();
+// }
 
 void readUniverseData(){
-    while(univ->activeParticleLock);
-    // univ->activeParticleLock = true;
-    univ->aggregatorLock = true;
-    particleList.clear();
-    for(int i = 0; i < univ->startingAggregators; ++i){
-        vector<int> tempVec;
-        tempVec.push_back(univ->aggregators[i].pos[0]);
-        tempVec.push_back(univ->aggregators[i].pos[1]);
-        tempVec.push_back(univ->aggregators[i].pos[2]);
-        tempVec.push_back(0);
-        particleList.push_back(tempVec);
-    }
-    for(list<Particle>::iterator i = univ->activeParticles.begin(); i != univ->activeParticles.end(); ++i){
-        vector<int> tempVec;
-        tempVec.push_back(i->pos[0]);
-        tempVec.push_back(i->pos[1]);
-        tempVec.push_back(i->pos[2]);
-        tempVec.push_back(1);
-        particleList.push_back(tempVec);
-    }
-    // univ->activeParticleLock = false;
-    univ->aggregatorLock = false;
+    delete particleList;
+    particleList = univ->generateOutputList();
 }
 
 void printText(float x, float y, float* color, string text){
@@ -99,10 +79,10 @@ void drawStatsBox(float x, float y, float* color){
 
     glColor3f(color[0], color[1], color[2]);
     ostringstream text;
-    text << "Active Particles: " << univ->numParticles;
+    text << "Active Particles: " << univ->getNumActiveParticles();
     printText(x + 10, y + 10, color, text.str());
     text.str(string());
-    text << "Aggregator Particles: " << univ->numAggregators;
+    text << "Aggregator Particles: " << univ->getNumAggregators();
     printText(x + 10, y + 35, color, text.str());
 }
 
@@ -129,7 +109,8 @@ void drawParticle(int type){
 void drawBoundingBox(){
     if(showBoundingBox){
         glColor3f(0.7f, 0.7f, 0.7f);
-        glutWireCube((univ->bounds[0] * particleRadius + particleRadius) * 2);
+        const int* bounds = univ->getBounds();
+        glutWireCube((bounds[0] * particleRadius + particleRadius) * 2);
     }
 }
 
@@ -154,7 +135,7 @@ void renderScene(void){
                 0.0f, 1.0f, 0.0f);
     glRotatef(angle, 0.0f, 1.0f, 0.0f);
     drawBoundingBox();     
-    for(list<vector<int> >::iterator i = particleList.begin(); i != particleList.end(); ++i){
+    for(list<vector<int> >::iterator i = particleList->begin(); i != particleList->end(); ++i){
             if(!showActive && (*i)[3] == 1){
                 continue;
             }
@@ -207,7 +188,7 @@ void processSpecialKeys(int key, int x, int y){
 }
 
 void printParticles(){
-    for(list<vector<int> >::iterator i = particleList.begin(); i != particleList.end(); ++i){
+    for(list<vector<int> >::iterator i = particleList->begin(); i != particleList->end(); ++i){
        printf("%d %d %d\n", (*i)[0], (*i)[1], (*i)[2]); 
     }
 }
@@ -220,13 +201,14 @@ void* runVisualizer(void* uni){
     char* argv[1] = {""};
     glutInit(&argc, argv);
 
-    xc = univ->bounds[0]/2;
-    yc = univ->bounds[1]/2;
-    zc = univ->bounds[2]/2;
+    const int* bounds = univ->getBounds();
+    xc = bounds[0]/2;
+    yc = bounds[1]/2;
+    zc = bounds[2]/2;
 
-    x = (float)univ->bounds[0] * 4;
-    y = (float)univ->bounds[1] * 4;
-    z = (float)univ->bounds[2] * 4;
+    x = (float)bounds[0] * 4;
+    y = (float)bounds[1] * 4;
+    z = (float)bounds[2] * 4;
 
     printf("Visualizer started successfully\n");
 

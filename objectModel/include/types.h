@@ -1,16 +1,12 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include "visualizer.h"
 #include "utilities.h"
 
-#include <iostream>
 #include <fstream>
 
 #include <pthread.h>
-#include <unistd.h>
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sstream>
@@ -19,15 +15,26 @@
 
 class Particle{
     public:
-        Particle(int* position);
+        Particle(int*);
+
+        //Operator overloads:
         bool operator<(const Particle&) const;
         bool operator<(const uint64_t) const;
 
-        void encodeLocation(int*);
+        void encodeLocation(const int*);
 
-        void move(int* vec);
-        int pos[3];
-        uint64_t mortonCode;
+        //Getters:
+        uint64_t getMortonCode() const {return mortonCode_;}
+        const int* getPosition() const {return position_;}
+
+        //Setters:
+        void setMortonCode(uint64_t mortonCode){mortonCode_ = mortonCode;}
+        void setPosition(int*);
+
+    private:        
+        int position_[3];
+
+        uint64_t mortonCode_;
 
         bool particleLock;
 };
@@ -35,8 +42,9 @@ class Particle{
 class Universe{
     public:
         Universe(int size);
+        ~Universe();
 
-        void addParticles(int number);
+        void addParticles(int);
         void addAggregators(char*);
         void generateAggregators(int, int, int*);
         void reserveMemory();
@@ -49,25 +57,43 @@ class Universe{
 
         void printParticles();
 
-        void writeOutputFile(char* filename);
+        void writeOutputFile(char*);
+
+        std::list<std::vector<int> >* generateOutputList();
 
         void renderUniverse();
 
-        int bounds[3];
+        //GETTERS:
+        const int* getBounds() const {return bounds_;}
+        int getNumActiveParticles() const {return numActiveParticles_;}
+        int getNumAggregators() const {return numAggregators_;}
 
-        bool aggregatorLock;
-        bool activeParticleLock;
+        void lockAggregators(){while(aggregatorLock_); aggregatorLock_ = true;}
+        void lockActiveParticles(){while(activeParticleLock_); activeParticleLock_ = true;}
 
-        int numParticles;
-        int numAggregators;
-        int startingAggregators;
+        void releaseAggregatorLock(){aggregatorLock_ = false;}
+        void releaseActiveParticleLock(){activeParticleLock_ = false;}
+
+
+    private:
+        int bounds_[3];
+
+        bool aggregatorLock_;
+        bool activeParticleLock_;
+
+        int numActiveParticles_;
+        int numAggregators_;
+        int startingAggregators_;
 
         //Use lists to enable parallelization later, as container mondification is safe
-        std::list<Particle> activeParticles;
+        std::list<Particle> activeParticles_;
 
         //Use vector for aggregators, since deletions do not occur, and so we can binary search
-        std::vector<Particle> aggregators;
+        std::vector<Particle> aggregators_;        
 
-        pthread_t visualizerThread;
+        pthread_t visualizerThread_;
 };
+
+//Forward declaration of the visualizer thread
+void* runVisualizer(void*);
 #endif
