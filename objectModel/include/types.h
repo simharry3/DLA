@@ -1,17 +1,36 @@
+/*
+    Types definition for the Particle and the Universe classes
+
+    PARTICLE:
+        particle class contains the particle's:
+            -Position
+            -Morton code (encoded position)
+            -Particle Mutex (currently unused)
+    
+    UNIVERSE:
+        Universe class contains information about the simulation:
+            -List of active particles
+            -Vector of aggregate particles
+            -Number of aggregate particles
+            -Number of active particles
+            -Visualizer thread handle
+            -Mutex locks for particle containers
+*/
+
 #ifndef TYPES_H
 #define TYPES_H
 
 #include "utilities.h"
 
-#include <fstream>
-
+#include <stdint.h>
 #include <pthread.h>
 
-#include <stdlib.h>
-#include <string.h>
-#include <sstream>
 #include <list>
 #include <vector>
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <algorithm>
 
 class Particle{
     public:
@@ -48,20 +67,15 @@ class Universe{
         void addAggregators(char*);
         void generateAggregators(int, int, int*);
         void reserveMemory();
-
         void generateMortonCodes();
-
         void moveParticles();
         void checkCollisions();
         bool checkVacant(int*);
-
         void printParticles();
-
         void writeOutputFile(char*);
+        void renderUniverse();
 
         std::list<std::vector<int> >* generateOutputList();
-
-        void renderUniverse();
 
         //GETTERS:
         const int* getBounds() const {return bounds_;}

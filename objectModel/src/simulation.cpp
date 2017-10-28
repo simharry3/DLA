@@ -1,5 +1,6 @@
 #include "types.h"
-#include <unistd.h>
+#include <stdlib.h>
+// #include <unistd.h>
 int numParticles = 1000;
 int universeSize = 600;
 
