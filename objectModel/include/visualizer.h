@@ -9,6 +9,4 @@
 #include <GL/glut.h>
 #include "types.h"
 
-using namespace std;
-
 void* runVisualizer(void* args);

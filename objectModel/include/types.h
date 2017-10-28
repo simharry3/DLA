@@ -1,13 +1,14 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include "visualizer.h"
+#include "utilities.h"
+
 #include <iostream>
 #include <fstream>
 
 #include <pthread.h>
 #include <unistd.h>
-
-#include "visualizer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,8 +16,6 @@
 #include <sstream>
 #include <list>
 #include <vector>
-
-using namespace std;
 
 class Particle{
     public:
@@ -29,6 +28,8 @@ class Particle{
         void move(int* vec);
         int pos[3];
         uint64_t mortonCode;
+
+        bool particleLock;
 };
 
 class Universe{
@@ -56,15 +57,16 @@ class Universe{
 
         bool aggregatorLock;
         bool activeParticleLock;
+
         int numParticles;
         int numAggregators;
         int startingAggregators;
 
         //Use lists to enable parallelization later, as container mondification is safe
-        list<Particle> activeParticles;
-        vector<Particle> collisions;
+        std::list<Particle> activeParticles;
+
         //Use vector for aggregators, since deletions do not occur, and so we can binary search
-        vector<Particle> aggregators;
+        std::vector<Particle> aggregators;
 
         pthread_t visualizerThread;
 };

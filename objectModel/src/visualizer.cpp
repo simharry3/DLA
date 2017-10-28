@@ -1,11 +1,9 @@
 #include "visualizer.h"
+#include "utilities.h"
 
+using namespace std;
 
 float angle = 90.0f;
-float red = 1.0f;
-float green = 1.0f;
-float blue = 1.0f;
-float lx=0.0f,lz=-1.0f;
 float x=300.0f,y=300.0f,z=300.0f;
 float xc=30.0f, yc=30.0f, zc=30.0f;
 float particleRadius = 1.0f;
@@ -19,6 +17,7 @@ bool showBoundingBox = false;
 bool rotation = false;
 bool showActive = true;
 bool smoothing = false;
+
 
 void readInputFile(char* filename){
     ifstream dataFile;
@@ -41,8 +40,8 @@ void readInputFile(char* filename){
 }
 
 void readUniverseData(){
-    while(univ->activeParticleLock || univ->aggregatorLock);
-    univ->activeParticleLock = true;
+    while(univ->activeParticleLock);
+    // univ->activeParticleLock = true;
     univ->aggregatorLock = true;
     particleList.clear();
     for(int i = 0; i < univ->startingAggregators; ++i){
@@ -61,7 +60,7 @@ void readUniverseData(){
         tempVec.push_back(1);
         particleList.push_back(tempVec);
     }
-    univ->activeParticleLock = false;
+    // univ->activeParticleLock = false;
     univ->aggregatorLock = false;
 }
 
@@ -213,6 +212,8 @@ void printParticles(){
     }
 }
 
+
+//MAIN VISUALIZER LOOP THAT IS PASSED TO PTHREAD:
 void* runVisualizer(void* uni){
     univ = (Universe*) uni;
     int argc = 1;
