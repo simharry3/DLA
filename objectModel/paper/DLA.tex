@@ -72,7 +72,7 @@
 %	ABSTRACT
 %----------------------------------------------------------------------------------------
 
-\Abstract{An efficient single-threaded application for performing Diffusion Limited Aggregation simulations, along with a companion OpenGL visualizer using the GLUT GL Utility Toolkit. Particle-aggregator collisions are detected in $O(n \log n)$ time complexity, however this could be improved with the implementation of tree-based collision detection. }
+\Abstract{An efficient single-threaded application for performing Diffusion Limited Aggregation simulations, along with a companion OpenGL visualizer using the GLUT GL Utility Toolkit. Particle-aggregator collisions are detected in $O(n \log n)$ time complexity, however this could be improved with the implementation of tree-based collision detection. This code is available here: \url{https://github.com/simharry3/DLA}}
 
 %----------------------------------------------------------------------------------------
 
@@ -116,7 +116,6 @@ To speed up collision detection with the aggregate particles, each aggregate par
 
 During the collision check step, rather than search the entire aggregator particle vector looking for a particle that matches the position of the desired movement, Morton encoding allows the vector to sorted in a deterministic way, and searched using \texttt{std\allowbreak::binary\_serch}. This reduces the lookup time from $O(n)$ to $O(\log n)$.
 \subsection{Visualizer}
-\subsubsection{Overview}
 Visualization is done using OpenGL. To increase performance, the visualizer is run in a separate thread using Pthreads. When the \texttt{Universe\allowbreak::renderUniverse()} method is called, the visualizer is started, and passed a pointer to the Universe class that called the visualizer.
 
 
@@ -144,7 +143,6 @@ Once the project has been built, the simulation can be run from the command line
 \begin{center}
     \texttt{<dir>/bin/simulation <Size> <Particles>}
 \end{center}
-\subsection{Output File}
 \subsection{Visualizer}
 Several options are available to the user from the visualizer, as displayed at the bottom of the visualization window:
 \begin{description}
