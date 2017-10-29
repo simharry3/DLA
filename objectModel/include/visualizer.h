@@ -1,6 +1,12 @@
-/*
-    OpenGL Visualizer for DLA simulation
-*/
+////////////////////////////////////////////
+//  FILE:   Visualizer.h
+//  DESC:  Provides Particle and Universe
+//          classes for DLA simulation.
+//
+//  AUTHOR: Clayton Rayment 
+//  Date:   10/28/2017
+////////////////////////////////////////////
+
 #ifndef VISUALIZER_H
 #define VISUALIZER_H
 

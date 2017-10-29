@@ -27,12 +27,12 @@ target_link_libraries(simulation
                         ${GLUT_glut_LIBRARY})
 
 
-add_executable(tests
-                tests/tests.cpp
-                src/types.cpp
-                src/visualizer.cpp
-                src/utilities.cpp)
-target_link_libraries(tests
-                        ${CMAKE_THREADS_LIB_INIT}
-                        ${OPENGL_LIBRARIES}
-                        ${GLUT_glut_LIBRARY})
+# add_executable(tests
+#                 tests/tests.cpp
+#                 src/types.cpp
+#                 src/visualizer.cpp
+#                 src/utilities.cpp)
+# target_link_libraries(tests
+#                         ${CMAKE_THREADS_LIB_INIT}
+#                         ${OPENGL_LIBRARIES}
+#                         ${GLUT_glut_LIBRARY})

@@ -1,5 +1,6 @@
 #include "types.h"
 #include <stdlib.h>
+#include <time.h>
 // #include <unistd.h>
 int numParticles = 1000;
 int universeSize = 600;
@@ -21,9 +22,12 @@ int main(int argc, char* argv[]){
     
     int step = 0;
     while(u1->getNumActiveParticles() > atoi(argv[2]) * .1){
+        // clock_t start = clock();
         u1->generateMortonCodes();
         u1->moveParticles();
         ++step;
+        // clock_t end = clock();
+        // printf("%fms\n", (double)(end-start)*1000.0/CLOCKS_PER_SEC);
         // printf("STEP %d | ACTIVE: %d | AGGREGATORS: %d\n", step, u1->numParticles, u1->numAggregators);
         // u1.writeOutputFile((char*)"output.dat");
         // sleep(1);

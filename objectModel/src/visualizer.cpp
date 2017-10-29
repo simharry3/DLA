@@ -19,25 +19,25 @@ bool showActive = true;
 bool smoothing = false;
 
 
-// void readInputFile(char* filename){
-//     ifstream dataFile;
-//     dataFile.open(filename);
-//     if(!dataFile){
-//         fprintf(stderr, "UNABLE TO OPEN FILE");
-//         exit(1);
-//     }
-//     int type,xin,yin,zin;
-//     particleList.clear();
-//     while(dataFile >> type >> xin >> yin >> zin){
-//         vector<int> tempVec;
-//         tempVec.push_back(xin);
-//         tempVec.push_back(yin);
-//         tempVec.push_back(zin);
-//         tempVec.push_back(type);
-//         particleList.push_back(tempVec);
-//     }
-//     dataFile.close();
-// }
+void readInputFile(char* filename){
+    ifstream dataFile;
+    dataFile.open(filename);
+    if(!dataFile){
+        fprintf(stderr, "UNABLE TO OPEN FILE");
+        exit(1);
+    }
+    int type,xin,yin,zin;
+    particleList->clear();
+    while(dataFile >> type >> xin >> yin >> zin){
+        vector<int> tempVec;
+        tempVec.push_back(xin);
+        tempVec.push_back(yin);
+        tempVec.push_back(zin);
+        tempVec.push_back(type);
+        particleList->push_back(tempVec);
+    }
+    dataFile.close();
+}
 
 void readUniverseData(){
     delete particleList;

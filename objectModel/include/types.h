@@ -1,21 +1,11 @@
-/*
-    Types definition for the Particle and the Universe classes
-
-    PARTICLE:
-        particle class contains the particle's:
-            -Position
-            -Morton code (encoded position)
-            -Particle Mutex (currently unused)
-    
-    UNIVERSE:
-        Universe class contains information about the simulation:
-            -List of active particles
-            -Vector of aggregate particles
-            -Number of aggregate particles
-            -Number of active particles
-            -Visualizer thread handle
-            -Mutex locks for particle containers
-*/
+////////////////////////////////////////////
+//  FILE:   Types.h
+//  DESC:  Provides Particle and Universe
+//          classes for DLA simulation.
+//
+//  AUTHOR: Clayton Rayment 
+//  Date:   10/28/2017
+////////////////////////////////////////////
 
 #ifndef TYPES_H
 #define TYPES_H
@@ -36,18 +26,41 @@ class Particle{
     public:
         Particle(int*);
 
-        //Operator overloads:
+        /*
+            Operator overload for Particle < Particle.
+            Operation compares via Morton codes.
+        */
         bool operator<(const Particle&) const;
-        bool operator<(const uint64_t) const;
 
+        /*
+            Operator overload for Particle < uint64_t.
+            Operation assumes input value is a valid morton code.
+        */
+        bool operator<(const uint64_t) const;
+        
+        /*
+            Encodes the Particle's position with a 30-bit Morton code.
+        */
         void encodeLocation(const int*);
 
-        //Getters:
+        /*
+            Gets Particle's morton code
+        */
         uint64_t getMortonCode() const {return mortonCode_;}
+
+        /*
+            Gets Particle's position
+        */
         const int* getPosition() const {return position_;}
 
-        //Setters:
+        /*
+            Sets Particle's morton code
+        */
         void setMortonCode(uint64_t mortonCode){mortonCode_ = mortonCode;}
+
+        /*
+            Sets Particle's Position
+        */
         void setPosition(int*);
 
     private:        
