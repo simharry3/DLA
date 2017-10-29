@@ -1,4 +1,13 @@
 .vscode
 **/*.dat
+**/*.aux
+**/*.bbl
+**/*.blg
+**/*.blg
+**/*.log
+**/*.out
+**/*.toc
+**/*.cls
+**/results.pdf
 planarModel/data
 **/simulation
