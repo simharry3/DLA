@@ -16,3 +16,5 @@ fixed in the future.
 TODO:
 -Add lighting to "Fancy" render mode
 -Add input aggregator flags
+-Finish implementing test suite
+-Enable output file writing
