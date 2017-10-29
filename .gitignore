@@ -7,7 +7,6 @@
 **/*.log
 **/*.out
 **/*.toc
-**/*.cls
 **/results.pdf
 planarModel/data
 **/simulation
