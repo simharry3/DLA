@@ -8,6 +8,7 @@ float x=300.0f,y=300.0f,z=300.0f;
 float xc=30.0f, yc=30.0f, zc=30.0f;
 float particleRadius = 1.0f;
 float pointSize = 0.2f;
+int subdivisions = 3;
 list<vector<int> >* particleList;
 
 Universe* univ = NULL;
@@ -95,7 +96,7 @@ void drawParticle(int type){
     }
     if(renderMode == "fancy"){
         glColor3f(1.0f, 1.0f, 1.0f);
-        glutSolidSphere(particleRadius, 10, 10);
+        glutSolidSphere(particleRadius, subdivisions, subdivisions);
     }
     else{
         glPointSize(pointSize);
@@ -168,9 +169,13 @@ void processSpecialKeys(int key, int x, int y){
         case GLUT_KEY_F1:
             if(renderMode == "fast"){
                 renderMode = "fancy";
+                glEnable(GL_LIGHTING);
+                glEnable(GL_LIGHT0);
             }
             else{
                 renderMode = "fast";
+                glDisable(GL_LIGHTING);
+                glDisable(GL_LIGHT0);
             
             }
             break;
@@ -210,12 +215,23 @@ void* runVisualizer(void* uni){
     y = (float)bounds[1] * 4;
     z = (float)bounds[2] * 4;
 
+
+    
+
     printf("Visualizer started successfully\n");
 
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(900, 900);
     glutCreateWindow("DLA Visualizer");
+
+
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_shininess[] = { 50.0 };
+    GLfloat light_position[] = { x/2, y/2, z/2, 0.0 };
+    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
