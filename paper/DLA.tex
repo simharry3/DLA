@@ -126,7 +126,7 @@ An aggregator file is a space-seperated value list containing only numbers in th
 \begin{center}
     \texttt{<X> <Y> <Z>}
 \end{center}
-Each line in the file represents a new aggregator particle in the system. Should the user not specify an imput aggregator file, there are several options available. Currently the only supported method is to use the two default aggregators, as the UI flags for using input files are not implemented.
+Each line in the file represents a new aggregator particle in the system. Several sample aggregate structures are located in the \texttt{<dir>/samples} directory. Should the user not specify an imput aggregator file a default aggregatior will be placed at the center of the simulation. 
 \subsection{Build Simulation}
 Cmake files are included to automate the build process. From your build directory simply run
 \begin{center}
@@ -143,6 +143,7 @@ Once the project has been built, the simulation can be run from the command line
 \begin{center}
     \texttt{<dir>/bin/simulation <Size> <Particles>}
 \end{center}
+A third, optional argument may be used to specify the location of the input aggregator file, otherwise the default aggregation will be used.
 \subsection{Visualizer}
 Several options are available to the user from the visualizer, as displayed at the bottom of the visualization window:
 \begin{description}
