@@ -11,12 +11,11 @@ int main(int argc, char* argv[]){
     Universe* u1 = new Universe(atoi(argv[1]));
     u1->addParticles(atoi(argv[2]));
     if(argc == 3){
-        int center[3] = {3, 3, 3};
-        u1->generateAggregators(1, 1, center);
+        int center[3];
         const int* bounds = u1->getBounds();
-        center[0] = bounds[0] - 3;
-        center[1] = bounds[1] - 3;
-        center[2] = bounds[2] - 3;
+        center[0] = bounds[0]/2;
+        center[1] = bounds[1]/2;
+        center[2] = bounds[2]/2;
         u1->generateAggregators(1, 1, center);
     }
    else if(argc > 3){
