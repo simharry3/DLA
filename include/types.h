@@ -76,28 +76,91 @@ class Universe{
         Universe(int size);
         ~Universe();
 
+        /*
+            Randomly generate a specified number of particles within the system bounds
+        */
         void addParticles(int);
+
+        /*
+            Add aggregator particles from file
+        */
         void addAggregators(char*);
+        
+        /*
+            Randomly generate a specified number of aggregator particles within a given radius
+        */
         void generateAggregators(int, int, int*);
+
+        /*
+            Reserve the memory of the aggregator vector to avoid resizing
+        */
         void reserveMemory();
+        
+        /*
+            Generate morton codes for all aggregator particles and sort the vector
+        */
         void generateMortonCodes();
-        void moveParticles();
-        void checkCollisions();
+
+
+        /*
+            Check to see if a given position is vacant using morton codes and binary search
+        */
         bool checkVacant(int*);
+
+        /*
+            Move particles and call to check collisions between particles
+        */
+        void moveParticles();
+
+        /*
+            Print output info for all particles in the universe
+        */
         void printParticles();
+
+        /*
+            Write all particle into to file, one particle per line
+        */
         void writeOutputFile(char*);
+
+        /*
+            Pthread management function, launches visualizer in new thread
+        */
         void renderUniverse();
 
+        /*
+            Generates the output list required by the visualizer so no direct access is required
+        */
         std::list<std::vector<int> >* generateOutputList();
 
-        //GETTERS:
+        /*
+            Get the bounds of the universe
+        */
         const int* getBounds() const {return bounds_;}
+
+        /*
+            Get the number of active particles
+        */
         int getNumActiveParticles() const {return numActiveParticles_;}
+        
+        /*
+            Get the number of aggregator particles
+        */
         int getNumAggregators() const {return numAggregators_;}
 
+        /*
+            Engage the lock for the aggregators vector to avoid iterator fouling across threads
+        */
         void lockAggregators(){while(aggregatorLock_); aggregatorLock_ = true;}
+       
+        /*
+            Engage the lock for the active particle list to avoid iterator fouling across threads
+        */
         void lockActiveParticles(){while(activeParticleLock_); activeParticleLock_ = true;}
 
+
+        /*
+            Release locks
+        */
         void releaseAggregatorLock(){aggregatorLock_ = false;}
         void releaseActiveParticleLock(){activeParticleLock_ = false;}
 
@@ -112,8 +175,7 @@ class Universe{
         int numAggregators_;
         int startingAggregators_;
 
-        //Use lists to enable parallelization later, as container mondification is safe
-        std::list<Particle> activeParticles_;
+       std::list<Particle> activeParticles_;
 
         //Use vector for aggregators, since deletions do not occur, and so we can binary search
         std::vector<Particle> aggregators_;        
