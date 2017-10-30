@@ -64,6 +64,9 @@ void Universe::addAggregators(char* filename){
     }
     int xi, yi, zi;
     while(agFile >> xi >> yi >> zi){
+        xi = max(min(xi, bounds_[0]), 0);
+        yi = max(min(yi, bounds_[1]), 0);
+        zi = max(min(zi, bounds_[2]), 0);
         int location[3] = {xi, yi, zi};
         aggregators_.push_back(Particle(location));
         ++numAggregators_;
