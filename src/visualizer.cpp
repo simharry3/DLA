@@ -6,6 +6,8 @@ using namespace std;
 float angle = 90.0f;
 float x=300.0f,y=300.0f,z=300.0f;
 float xc=30.0f, yc=30.0f, zc=30.0f;
+float xz = 0.0f, yz = 0.0f, zz = 0.0f;
+float ratio = 1.0;
 float particleRadius = 1.0f;
 float pointSize = 0.2f;
 int subdivisions = 3;
@@ -117,11 +119,11 @@ void drawBoundingBox(){
 
 void changeSize(int w, int h){
     h = max(1, h);
-    float ratio = (1.0 * w)/h;
+    ratio = (1.0 * w)/h;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glViewport(0, 0, w, h);
-    gluPerspective(45, ratio, 1, 1000);
+    gluPerspective(45, ratio, .1, 1000);
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -134,8 +136,13 @@ void renderScene(void){
     gluLookAt(  x, y, z,
                 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f);
+    glTranslatef(xz, yz, zz); 
     glRotatef(angle, 0.0f, 1.0f, 0.0f);
-    drawBoundingBox();     
+    drawBoundingBox();
+    if(renderMode == "fancy"){
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
+    }     
     for(list<vector<int> >::iterator i = particleList->begin(); i != particleList->end(); ++i){
             if(!showActive && (*i)[3] == 1){
                 continue;
@@ -144,6 +151,10 @@ void renderScene(void){
             glTranslatef(((*i)[0]-xc)*particleRadius*2 + particleRadius, ((*i)[1]-yc)*particleRadius*2 + particleRadius, ((*i)[2]-zc)*particleRadius*2 + particleRadius);
             drawParticle((*i)[3]);
             glPopMatrix();
+    }
+    if(renderMode == "fancy"){
+        glDisable(GL_LIGHTING);
+        glDisable(GL_LIGHT0);
     }
 
 
@@ -169,8 +180,6 @@ void processSpecialKeys(int key, int x, int y){
         case GLUT_KEY_F1:
             if(renderMode == "fast"){
                 renderMode = "fancy";
-                glEnable(GL_LIGHTING);
-                glEnable(GL_LIGHT0);
             }
             else{
                 renderMode = "fast";
@@ -190,6 +199,24 @@ void processSpecialKeys(int key, int x, int y){
             break;
     }
 
+}
+
+void processMouse(int button, int state, int x, int y){
+    if(button == 3 || button == 4){
+        if(state == GLUT_UP){
+            return;
+        }
+        if(button == 3){
+            xz += 10;
+            yz += 10;
+            zz += 10;
+        }
+        else{
+            xz -= 10;
+            yz -= 10;
+            zz -= 10;            
+        }
+    }
 }
 
 void printParticles(){
@@ -241,5 +268,6 @@ void* runVisualizer(void* uni){
     glutIdleFunc(renderScene);
     glutKeyboardFunc(processNormalKeys);
     glutSpecialFunc(processSpecialKeys);
+    glutMouseFunc(processMouse);
     glutMainLoop();
 }
