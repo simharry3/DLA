@@ -10,7 +10,7 @@ float xz = 0.0f, yz = 0.0f, zz = 0.0f;
 float ratio = 1.0;
 float particleRadius = 1.0f;
 float pointSize = 0.2f;
-int subdivisions = 3;
+int subdivisions = 4;
 list<vector<int> >* particleList;
 
 Universe* univ = NULL;
@@ -87,6 +87,11 @@ void drawStatsBox(float x, float y, float* color){
     text.str(string());
     text << "Aggregator Particles: " << univ->getNumAggregators();
     printText(x + 10, y + 35, color, text.str());
+    text.str(string());
+    text << "X: " << xz << "\n";
+    text << "Y: " << yz << "\n";
+    text << "Z: " << zz << "\n";
+    printText(x + 10, y - 25, color, text.str());
 }
 
 void drawParticle(int type){
@@ -123,7 +128,7 @@ void changeSize(int w, int h){
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glViewport(0, 0, w, h);
-    gluPerspective(45, ratio, .1, 1000);
+    gluPerspective(45, ratio, .1, 100000);
     glMatrixMode(GL_MODELVIEW);
 }
 
@@ -159,7 +164,7 @@ void renderScene(void){
 
 
     float color[3] = {0.5f, 0.5f, 0.5f};
-    printText(10, 10, color,    "ESC - Exit   |   F1 - Mode   |   F2 - Bounds   |   F3 - Rotation   |   F4 - Active"); 
+    printText(10, 10, color,    "ESC - Exit   |   F1 - Mode   |   F2 - Bounds   |   F3 - Rotation   |   F4 - Active   |   Mouse Wheel - Zoom"); 
     drawStatsBox(10, glutGet(GLUT_WINDOW_HEIGHT) - 60 , color);
 
     if(rotation){
@@ -207,14 +212,14 @@ void processMouse(int button, int state, int x, int y){
             return;
         }
         if(button == 3){
-            xz += 10;
-            yz += 10;
-            zz += 10;
+            xz = min((float)z - 10, xz + 10);
+            yz = min((float)z - 10, yz + 10);
+            zz = min((float)z - 10, zz + 10);
         }
         else{
             xz -= 10;
             yz -= 10;
-            zz -= 10;            
+            zz -= 10;          
         }
     }
 }
