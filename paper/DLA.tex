@@ -117,8 +117,14 @@ To speed up collision detection with the aggregate particles, each aggregate par
 During the collision check step, rather than search the entire aggregator particle vector looking for a particle that matches the position of the desired movement, Morton encoding allows the vector to sorted in a deterministic way, and searched using \texttt{std\allowbreak::binary\_serch}. This reduces the lookup time from $O(n)$ to $O(\log n)$.
 \subsection{Visualizer}
 Visualization is done using OpenGL. To increase performance, the visualizer is run in a separate thread using Pthreads. When the \texttt{Universe\allowbreak::renderUniverse()} method is called, the visualizer is started, and passed a pointer to the Universe class that called the visualizer.
-
-
+\subsubsection{freeGLUT}
+freeGLUT is an open source alternative to the GL Utility Toolkit (GLUT), which is a library for C/C++, FORTRAN, and Ada. Writing a visualizer with freeGLUT consists of writing several functions and registering them with freeGLUT so that they can be executed during certain events. These include:
+\begin{itemize}
+    \item keyboard input
+    \item mouse input
+    \item window resize
+    \item program idle
+\end{itemize}
 
 \section{Operation}
 \subsection{Aggregator Generation}
@@ -126,13 +132,13 @@ An aggregator file is a space-seperated value list containing only numbers in th
 \begin{center}
     \texttt{<X> <Y> <Z>}
 \end{center}
-Each line in the file represents a new aggregator particle in the system. Several sample aggregate structures are located in the \texttt{<dir>/samples} directory. Should the user not specify an imput aggregator file a default aggregatior will be placed at the center of the simulation. 
+Each line in the file represents a new aggregator particle in the system. Several sample aggregate structures are located in the \texttt{<dir>/samples} directory. Should the user not specify an imput aggregator file a default aggregatior will be placed at the center of the simulation.
 \subsection{Build Simulation}
 Cmake files are included to automate the build process. From your build directory simply run
 \begin{center}
     \texttt{cmake <dir>}
 \end{center}
-where \texttt{<dir>} is the path to the main \texttt{DLA/} directory which contains \texttt{CMakeLists.txt}. 
+where \texttt{<dir>} is the path to the main \texttt{DLA/} directory which contains \texttt{CMakeLists.txt}.
 Then, from your build directory, simply run:
 \begin{center}
     \texttt{make}
