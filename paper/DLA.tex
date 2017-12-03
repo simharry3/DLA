@@ -109,14 +109,20 @@ Diffusion Limited Aggregation is a simulation technique consisting of two basic 
 \subsubsection{Particle}
 The \texttt{Particle} class is the most basic object of the simulation. The particle class defines only the location of the particle, the particle’s morton code, and functions to retreive/set these values. During the simulation, a particle will move randomly in one of eight possible directions by adding a random integer value [-1, 1] to each component of the particle’s position. Particles also contain a function which encodes the position into a 30-bit morton code, which is used to accelerate aggregation detection.
 \subsubsection{Universe}
-The \texttt{Universe} class is the overarching structure which contains all simulation operations. \texttt{Universe} contains an \texttt{std\allowbreak::vector} of all aggregated particles, and an \texttt{std\allowbreak::list} of all active particles. During each step of the simulation, the active particle list is iterated through, and each particle is moved, checking for collisions with the aggregate particles. For simplicity, collsions between active particles cannot occur, and the two particles will simply pass through eachother. 
+The \texttt{Universe} class is the overarching structure which contains all simulation operations. \texttt{Universe} contains an \texttt{std\allowbreak::vector} of all aggregated particles, and an \texttt{std\allowbreak::list} of all active particles. During each step of the simulation, the active particle list is iterated through, and each particle is moved, checking for collisions with the aggregate particles. For simplicity, collsions between active particles cannot occur, and the two particles will simply pass through eachother. Boundary conditions for the universe are enforced by not allowing a particle to travel beyond the simulation bounds. Should a particle be assigned a random motion that would take it outside of the simulation bounds, the component that would exceede the simulation bounds is capped at the bound.
 
 \subsection{Fast Aggregate Lookup}
 To speed up collision detection with the aggregate particles, each aggregate particle is assigned a Morton code based on the position of the particle. The \texttt{std\allowbreak::vector} container which holds all aggregator particles is then sorted using the aggregator particle's morton code.
 
 During the collision check step, rather than search the entire aggregator particle vector looking for a particle that matches the position of the desired movement, Morton encoding allows the vector to sorted in a deterministic way, and searched using \texttt{std\allowbreak::binary\_serch}. This reduces the lookup time from $O(n)$ to $O(\log n)$.
 \subsection{Visualizer}
-Visualization is done using OpenGL. To increase performance, the visualizer is run in a separate thread using Pthreads. When the \texttt{Universe\allowbreak::renderUniverse()} method is called, the visualizer is started, and passed a pointer to the Universe class that called the visualizer.
+Visualization is done using OpenGL. To increase performance, the visualizer is run in a separate thread using Pthreads. When the \texttt{Universe\allowbreak::renderUniverse()} method is called, the visualizer is started, and passed a pointer to the Universe class that called the visualizer. The visualizer features some interactive features which are listed at the bottom of the simulation window. 
+\subsubsection{Graphics Modes}
+The visualizer offers two graphics modes to the user: fast and fancy. In fast graphics mode, all particles are represented as 
+\subsubsection{Bounding Box}
+\subsubsection{Rotation}
+\subsubsection{Active Particle Display}
+\subsubsection{Zoom}
 \subsubsection{freeGLUT}
 freeGLUT is an open source alternative to the GL Utility Toolkit (GLUT), which is a library for C/C++, FORTRAN, and Ada. Writing a visualizer with freeGLUT consists of writing several functions and registering them with freeGLUT so that they can be executed during certain events. These include:
 \begin{itemize}
