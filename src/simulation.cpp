@@ -26,9 +26,14 @@ int main(int argc, char* argv[]){
     u1->renderUniverse();
     
     int step = 0;
+    u1->generateMortonCodes();
     while(u1->getNumActiveParticles() > atoi(argv[2]) * .1){
-        u1->generateMortonCodes();
+        u1->lockActiveParticles();
+        u1->lockAggregators();
         u1->moveParticles();
+        u1->generateMortonCodes();
+        u1->releaseActiveParticleLock();
+        u1->releaseAggregatorLock();
         ++step;
     }
     delete u1;

@@ -6,20 +6,22 @@ using namespace std;
 float angle = 90.0f;
 float x=300.0f,y=300.0f,z=300.0f;
 float xc=30.0f, yc=30.0f, zc=30.0f;
-float xz = 0.0f, yz = 0.0f, zz = 0.0f;
+float xz = 150.0f, yz = 150.0f, zz = 150.0f;
 float ratio = 1.0;
 float particleRadius = 1.0f;
-float pointSize = 0.2f;
+float pointSize = 1.0f;
 int subdivisions = 4;
+
 list<vector<int> >* particleList;
 
 Universe* univ = NULL;
 
 string renderMode = "fast";
-bool showBoundingBox = false;
-bool rotation = false;
-bool showActive = true;
+bool showBoundingBox = true;
+bool rotation = true;
+bool showActive = false;
 bool smoothing = false;
+bool displayMorton = false;
 
 
 void readInputFile(char* filename){
@@ -106,11 +108,9 @@ void drawParticle(int type){
         glutSolidSphere(particleRadius, subdivisions, subdivisions);
     }
     else{
-        glPointSize(pointSize);
         glBegin(GL_POINTS);
-            glVertex2f(0.0, 0.0);
+            glVertex3f(0.0, 0.0, 0.0);
         glEnd();
-        // glutSolidSphere(particleRadius, 10, 10);
     }
 }
 
@@ -133,10 +133,10 @@ void changeSize(int w, int h){
 }
 
 void renderScene(void){
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     readUniverseData();
     // readInputFile((char*)"output.dat");
     glMatrixMode(GL_MODELVIEW);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();  
     gluLookAt(  x, y, z,
                 0.0f, 0.0f, 0.0f,
@@ -148,6 +148,7 @@ void renderScene(void){
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
     }     
+
     for(list<vector<int> >::iterator i = particleList->begin(); i != particleList->end(); ++i){
             if(!showActive && (*i)[3] == 1){
                 continue;
@@ -162,9 +163,20 @@ void renderScene(void){
         glDisable(GL_LIGHT0);
     }
 
+    if(displayMorton){
+        glColor3f(1.0, 1.0, 1.0);
+        glBegin(GL_LINE_STRIP);
+        for(list<vector<int> >::iterator i = particleList->begin(); i != particleList->end(); ++i){
+            if((*i)[3] == 0){
+                glVertex3f(((*i)[0]-xc)*particleRadius*2 + particleRadius, ((*i)[1]-yc)*particleRadius*2 + particleRadius, ((*i)[2]-zc)*particleRadius*2 + particleRadius);
+            }
+        }
+        glEnd();
+    }
+
 
     float color[3] = {0.5f, 0.5f, 0.5f};
-    printText(10, 10, color,    "ESC - Exit   |   F1 - Mode   |   F2 - Bounds   |   F3 - Rotation   |   F4 - Active   |   Mouse Wheel - Zoom"); 
+    printText(10, 10, color,    "ESC - Exit  |  F1 - Mode  |  F2 - Bounds  |  F3 - Rotation  |  F4 - Active  |  F5 - Morton  |  M/W - Zoom"); 
     drawStatsBox(10, glutGet(GLUT_WINDOW_HEIGHT) - 60 , color);
 
     if(rotation){
@@ -201,6 +213,9 @@ void processSpecialKeys(int key, int x, int y){
             break;
         case GLUT_KEY_F4:
             showActive = !showActive;
+            break;
+        case GLUT_KEY_F5:
+            displayMorton = !displayMorton;
             break;
     }
 
@@ -264,6 +279,8 @@ void* runVisualizer(void* uni){
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+    glPointSize(pointSize);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);

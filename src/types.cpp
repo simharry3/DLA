@@ -92,14 +92,16 @@ void Universe::generateMortonCodes(){
     for(vector<Particle>::iterator i = aggregators_.begin(); i != aggregators_.end(); ++i){
         i->encodeLocation(bounds_);
     }
+    // this->lockAggregators();
     sort(aggregators_.begin(), aggregators_.end());
+    // this->releaseAggregatorLock();
 }
 
 void Universe::moveParticles(){
     int vec[3];
     startingAggregators_ = numAggregators_;
-    this->lockActiveParticles();
-    this->lockAggregators();
+    // this->lockActiveParticles();
+    // this->lockAggregators();
     const int* pos;
     list<Particle>::iterator i = activeParticles_.begin();
     while(i != activeParticles_.end()){
@@ -118,8 +120,8 @@ void Universe::moveParticles(){
             ++numAggregators_;
         }
     }
-    this->releaseActiveParticleLock();
-    this->releaseAggregatorLock();
+    // this->releaseActiveParticleLock();
+    // this->releaseAggregatorLock();
 }
 
 bool Universe::checkVacant(int* pos){
