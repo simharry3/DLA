@@ -205,9 +205,9 @@ justification=raggedright]{caption}
 \colorbox{color2!10}{%
 \parbox{\textwidth-4\fboxsep-2\fboxrule}{%
 \ifx\@Keywords\@empty%
-\sffamily\textbf{\abstractname}\\\@Abstract%
+\sffamily\textbf{Description}\\\@Abstract%
 \else%
-\sffamily\textbf{\abstractname}\\\@Abstract\\[4pt]%
+\sffamily\textbf{Description}\\\@Abstract\\[4pt]%
 \textbf{\keywordname}\\\@Keywords%
 \fi%
 }%
