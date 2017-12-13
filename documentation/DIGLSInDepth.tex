@@ -61,7 +61,7 @@
 \JournalInfo{Journal, Vol. XXI, No. 1, 1-5, 2013} % Journal information
 \Archive{Additional note} % Additional notes (e.g. copyright, DOI, review/research article)
 
-\PaperTitle{DIGLS Overview} % Article title
+\PaperTitle{Interactive Diffusion Limited Aggregation Simulations Using OpenGL} % Article title
 
 \Authors{Clayton Rayment\textsuperscript{1}} % Authors
 % \affiliation{\textsuperscript{1}\textit{Department of Biology, University of Examples, London, United Kingdom}} % Author affiliation
@@ -134,7 +134,7 @@ Currently, the implementation sorts the vector of aggregate particles every time
 The Fast Aggregate Lookup algorithm can be seen in Algorithm \ref{alg:FAL}.
 
 \begin{algorithm}
-    \caption{Morton Key Generation Code}\label{alg:Mcodes}
+    \caption{Morton Key Generation Code \cite{Karras:2012}}\label{alg:Mcodes}
     \Def{expandBits(unsigned int v)}{
         v = (v * 0x00010001u) \& 0xFF0000FFu\\
         v = (v * 0x00000101u) \& 0x0F00F00Fu\\
@@ -385,21 +385,30 @@ freeGLUT is an open source alternative to the GL Utility Toolkit (GLUT), which i
     When none of these functions are being used, freeGLUT will call the idle function. During idle, we would like the visualizer to continue rendering like normal, so we simply register the \texttt{renderScene()} function as the idle function.\\
 
 %------------------------------------------------
-\section{Performance Analysis}
-\subsection{Simulation}
-\subsubsection{Binary Collision Performance}
-Shown in Figure \ref{fig:BinaryCollision} is a plot of collision lookup time vs number of particles in the simulation.
-\begin{figure}[!ht]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
-    \includegraphics[width=\linewidth]{images/CornersMorton.png}
-    \caption{DLA Visualizer application shown using fast graphics, bounding box, and morton line overlay.}
-    \label{fig:CornersMorton}
-\end{figure}
+\section{Future Work}
+DIGLS is very much still a work in progress. While it is currently at a good starting point, there are several features that would allow DIGLS to be even better. Changes will be made to both the Simulator and the Visualizer in the future, which will hopefully improve both the simulation experience, and the user experience.
+\subsection{Simulator}
+\subsubsection{Aggregate Collision Lookup}
+Currently the DIGLS Simulator uses a binary search on a morton-key sorted vector of particles for every particle which is stepping in the simulation. This lookup time could be greatly improved by using a hierarchical structure such as an octree or BVH. By creating a tree structure to contain the aggregate particles, it becomes easy to determine whether or not collisions need to be calculated for a specific particle or not.
 
 \subsection{Visualizer}
-\subsubsection{Render Mode}
-Shown in Figure \ref{fig:renderTime} is a comparison of render times for Fast and Fancy graphics modes vs number of particles for one frame of the visualization. 
-\subsubsection{Morton Line}
-Shown in Figure \ref{fig:mortonRenderTime} is a comparison of render times for Fast and Fast w/ Morton Line vs number of particles for one frame of the visualization.
+\subsubsection{Global Lighting}
+While local lighting makes a big improvement on simulation appearance, using a global lighting model would make it much easier for the user to discern small features on the aggregate structure that the local lighting model does not allow for. Shown in Figure \ref{fig:GlobalLighting} is a render of a small amount of sample data in Blender, using high quality spheres, and a global lighting model. With a global lighting model shadows cast over nooks and crevices allow the user to see those features with much more clarity.
+
+\begin{figure}[!ht]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
+    \includegraphics[width=\linewidth]{images/DLAGoodRenderSmooth.png}
+    \caption{Blender Render of a partial DLA simulation with global lighting effects.}
+    \label{fig:GlobalLighting}
+    \end{figure}
+
+\subsubsection{Depth Fog}
+Another option to help render speeds, and to further improve the feeling of depth, is to add depth fog. Shown in Figure \ref{fig:BlenderFog} fog was added to the render, and now features that lie along the z axis are much easier to tell from one another. In the Blender render, the fog effects are greatly exaggerated in order to show the effect, however in the visualizer this could simply be implemented as an atmospheric haze, or other subtle effect to give the user the feeling of depth.
+
+\begin{figure}[!ht]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
+    \includegraphics[width=\linewidth]{images/DLAGoodRenderSmoothLightMist.png}
+    \caption{Blender Render of a partial DLA simulation with global lighting effects and depth fog.}
+    \label{fig:BlenderFog}
+    \end{figure}
 
 
 %------------------------------------------------

@@ -25,6 +25,9 @@
 \usepackage[T1]{fontenc}
 
 % \usepackage{microtype}
+\usepackage{amsmath}
+\usepackage[linesnumbered,ruled]{algorithm2e}
+\SetKwProg{Def}{def}{:}{end}
 
 \usepackage[english]{babel} % Specify a different language here - english by default
 
@@ -103,7 +106,18 @@ Diffusion Limited Aggregation is a simulation technique consisting of two basic 
     \end{figure}
 
 %------------------------------------------------
+\section{Diffusion Limited Aggregation}
+Diffusion Limited Aggregation has many parallels to natural systems. Crystalline growth is a commonly used example, where particles in suspension aggregate on a structure which grows as more particles in suspension collide with the structure. Shown in Figure \ref{fig:Aggregate} from YouTube user Anne Helmenstine \cite{Helmenstine:2011} is a salt crystal she grew. This is an example of an aggregate structure, as the crystals form on the previously existing crystals in the structure.
 
+\begin{figure}[!h]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
+    \includegraphics[width=\linewidth]{images/saltCrystal.jpg}
+    \caption{In this image, taken from Anne Helmenstine's YouTube channel \cite{Helmenstine:2011}, an example of aggregate crystal growth is shown.}
+    \label{fig:AnneHelmenstineSalt}
+    \end{figure}
+
+~\\
+
+For this DLA simulation, we make several simplifications in order to ease the simulation process. For example, we do not consider aggregations between active particles. This means that there can be no "detached aggregators" which float around the simulation space aggregating particles as they go. Another such simplification that we make is that active particles not only do not aggregate with eachother, but they do not collide as well. This means that if in a given timestep two active particles move to the same location, they will occupy that location until the next timestep where they will most likely move apart from one another. In normal crystal growth, many small aggregate structures form as particles collide with eachother in solution, and then these combine to form larger aggregate structures.
 \section{Implementation}
 \subsection{Classes}
 \subsubsection{Particle}
@@ -115,8 +129,86 @@ Boundary conditions for the universe are enforced by not allowing a particle to 
 The \texttt{Universe} class also contains the visualizer launcher, which is called before the simulation begins running, and launches the visualizer in a seperate pthread task.\\
 
 \subsection{Fast Aggregate Lookup}
-To speed up collision detection with the aggregate particles, each aggregate particle is assigned a Morton code based on the position of the particle. A helpful diagram for this is shown in Figure \ref{fig:KarrasMortonGeneration} which is taken from \ref{karras2012}. The \texttt{std\allowbreak::vector} container which holds all aggregator particles is then sorted using the aggregator particle's morton code. \\~\\
+To speed up collision detection with the aggregate particles, each aggregate particle is assigned a Morton code based on the position of the particle. A helpful diagram for this is shown in Figure \ref{fig:KarrasMortonGeneration} which is taken from \cite{Karras:2012}. The \texttt{std\allowbreak::vector} container which holds all aggregator particles is then sorted using the aggregator particle's morton code. \\~\\
 Currently, the implementation sorts the vector of aggregate particles every timestep. A more efficient implementation of this would be to use binary insertion to place new aggregator particles into the vector. This could be efficiently achieved by using a linked list, like the Active particles are stored. Linked lists would allow for insertion without a memory movement penalty like a vector would incur. Future versions of DIGLS may implement this.\\
+The Fast Aggregate Lookup algorithm can be seen in Algorithm \ref{alg:FAL}.
+
+\begin{algorithm}
+    \caption{Morton Key Generation Code \cite{Karras:2012}}\label{alg:Mcodes}
+    \Def{expandBits(unsigned int v)}{
+        v = (v * 0x00010001u) \& 0xFF0000FFu\\
+        v = (v * 0x00000101u) \& 0x0F00F00Fu\\
+        v = (v * 0x00000011u) \& 0xC30C30C3u\\
+        v = (v * 0x00000005u) \& 0x49249249u\\
+        return v\\
+    }
+    
+    \Def{encodePosition(float* pos)}{
+        pos[0] = min(max(x * 1024.0f, 0.0f), 1023.0f)\\
+        pos[1] = min(max(y * 1024.0f, 0.0f), 1023.0f)\\
+        pos[2] = min(max(z * 1024.0f, 0.0f), 1023.0f)\\
+        unsigned int xx = expandBits((uint)pos[0])\\
+        unsigned int yy = expandBits((uint)pos[1])\\
+        unsigned int zz = expandBits((uint)pos[2])\\
+        return xx * 4 + yy * 2 + zz\\
+    }
+
+    \Def{generateMortonCodes}{
+        \For{p in Aggregators}{
+            const float* pos = p->getPosition
+            p->mortonCode = encodePosition(pos)
+        }
+    }
+\end{algorithm}
+
+
+\begin{algorithm}
+    \caption{Particle Movement and Collision Detection Algorithm}\label{alg:FAL}
+    \Def{moveParticles}{
+        int vec[3]\\
+        const int* position\\
+        list<Particle> iterator i = activeParticles.begin\\
+        \While{i != activeParticles.end}{
+            pos = i->getPosition\\
+            \For{j in range(0,3)}{
+                vec[j] = min(max(rand() \% 3 - 1 + pos[j], 0), bounds[j])
+            }
+            \If{checkVacant(vec)}{
+                i->setPosition(vec)\\
+                ++i
+            }
+            \Else{
+                aggregators.push\_back(*i)\\
+                i = activeParticles.erase(i)\\
+                --numActiveParticles\\
+                ++numAggregators\\
+            }
+        }
+    }
+
+    \Def{checkVacant(pos)}{
+        testParticle = Particle(pos)\\
+        testParticle.encodeLocation(bounds)\\
+        return(!binary\_search(aggregators, testParticle))\\
+    }
+\end{algorithm}
+
+\begin{algorithm}
+    \caption{Simulation Sequence}\label{alg:SimSequence}
+    \Def{runSimulation}{
+        generateMortonCodes()\\
+        int step = 0
+        \While{numActiveParticles > numParticles * .1}{
+            lockActiveParticles()\\
+            lockAggregators()\\
+            moveParticles()\\
+            generateMortonCodes()\\
+            releaseActiveParticleLock()\\
+            releaseAggregatorLock()\\
+            ++step\\
+        }
+    }
+\end{algorithm}
 
 \begin{figure}[!h]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
     \includegraphics[width=\linewidth]{images/fig04-z-curvekarras.png}
@@ -193,10 +285,95 @@ freeGLUT is an open source alternative to the GL Utility Toolkit (GLUT), which i
     To accomplish this, we first check which rendering mode we are using. If we are using fancy graphics, we enable lighting, otherwise we keep it disabled. We then push our matrix back onto the stack, and then translate to each location where there should be a particle, and place one there, using either a sphere or a point depending on the fancy/fast setting. If necessary, we then disable lighting, as the particles are the only object subject to lighting.\\~\\
     We then check to see if the user has requested for the morton curve to be drawn. If they have, we iterate through the list of aggregators, and create a \texttt{GL\_LINE\_STRIP} object using all of the aggregator locations as vertices. Since the aggregators are already sorted by morton code, this will result in the proper ordering of the morton curve.\\~\\
     Finally, we render the real time information on the screen by pushing the projection and model view matrices onto the stack, and then loading the identity into both. We are now free to draw text on the screen using an ortho2d projection matrix. To account for height and width changes of the window, we request values for these, and then locate our text proportionally based on the window size. Once complete, we pop the projection and modelview matrices to return to our normal view of the rest of the simulation.\\~\\
-    Once all drawing tasks have completed, we increment the rotation counter, and the call \texttt{glutSwapBuffer} to swap the draw and display buffers so that the user can see the new frame.\\
+    Once all drawing tasks have completed, we increment the rotation counter, and the call \texttt{glutSwapBuffer} to swap the draw and display buffers so that the user can see the new frame.\\~\\
+    The overall framework for this function can be seen in Algorithm \ref{fig:RenderFunction}.
+
+    \begin{algorithm}
+        \caption{Render Scene}\label{fig:RenderFunction}
+        Clear Color Buffer\\
+        Clear Depth Buffer\\
+        Read Universe State\\
+        Translate and Rotate Camera\\
+        Draw Bounding Box\\
+        \If{(fancyRender == True)}
+        {
+            Enable Lighting
+        }
+        \For{(p in particles)}
+        {
+            \If{(showActive == False \&\& p == Active)}
+            {
+                Continue
+            }
+            \Else
+            {
+                Draw Particle
+            }
+        }
+        \If{(fancyRender == True)}
+        {
+            Disable Lighting
+        }
+        \If{(showMorton == True)}{
+            START GL\_LINE\_STRIP\\
+            \For{(p in particles)}
+            {
+                \If{p == Aggregate}
+                {
+                    Add Vertex p.position
+                }
+            }
+            END GL\_LINE\_STRIP\\
+        }
+        Display Controls
+        Display Stats
+        \If{(rotation == True)}
+        {
+            rotationAngle += rotationIncrement 
+        }
+        Swap Buffers
+    \end{algorithm}
     
 \subsubsection{Keyboard Input}
-    To enable interactivity, several options must be availabile on the keyboard. Keyboard input is enabled in freeGLUT with registration of two functions. The first function handles input of regular keys. In our case, the only regular key used is the "ESC" key, which is used to exit the visualizer. The second function is used to handle the function keys F1-F12. These are the keys that we use to control most of the interactivity of the simulation. When a function key is pressed, a global toggle corresponding to the option is toggled. For example, if a user presses "F4" a global boolean \texttt{showActive} is toggled, and is used by the \texttt{renderScene()} function to determine whether or not to draw the active particles.\\
+    To enable interactivity, several options must be availabile on the keyboard. Keyboard input is enabled in freeGLUT with registration of two functions. The first function handles input of regular keys. In our case, the only regular key used is the "ESC" key, which is used to exit the visualizer. The second function is used to handle the function keys F1-F12. These are the keys that we use to control most of the interactivity of the simulation. When a function key is pressed, a global toggle corresponding to the option is toggled. For example, if a user presses "F4" a global boolean \texttt{showActive} is toggled, and is used by the \texttt{renderScene()} function to determine whether or not to draw the active particles. Shown in Algorithm \ref{alg:Keyboard} are the keyboard input functions.\\
+
+    \begin{algorithm}
+        \caption{Process Keys}\label{fig:RenderFunction}
+        \Def{processNormalKeys}
+        {
+            \If{key == 27}
+            {
+                exit
+            }
+        }
+        
+        \Def{processSpecialKeys}
+        {
+            \Switch{key}{
+                \Case{GLUT\_KEY\_F1}{
+                    fancyRender = !fancyRender\\
+                    break
+                }
+                \Case{GLUT\_KEY\_F2}{
+                    showBoundingBox = !showBoundingBox\\
+                    break
+                }
+                \Case{GLUT\_KEY\_F3}{
+                    rotation = !rotation\\
+                    break
+                }
+                \Case{GLUT\_KEY\_F4}{
+                    showActive = !showActive\\
+                    break
+                }
+                \Case{GLUT\_KEY\_F5}{
+                    displayMorton = !displayMorton\\
+                    break
+                }
+            }
+        }
+    \end{algorithm}
+
     
 \subsubsection{Mouse Input}
     To enable the user to zoom in and out of the simulation space, a mouse input function is registered with freeGLUT. When mouse input is detected, this function is called. In most cases, the mouse scroll wheel is detected as buttons 3 and 4. Each click of the mouse wheel counts as a button press and release event, so to avoid scrolling twice per tick, we ignore any \texttt{GLUT\_UP} events, and only increment the zoom offset on \texttt{GLUT\_DOWN} events, which will occur once per scroll wheel tick.\\
@@ -208,13 +385,37 @@ freeGLUT is an open source alternative to the GL Utility Toolkit (GLUT), which i
     When none of these functions are being used, freeGLUT will call the idle function. During idle, we would like the visualizer to continue rendering like normal, so we simply register the \texttt{renderScene()} function as the idle function.\\
 
 %------------------------------------------------
+\section{Future Work}
+DIGLS is very much still a work in progress. While it is currently at a good starting point, there are several features that would allow DIGLS to be even better. Changes will be made to both the Simulator and the Visualizer in the future, which will hopefully improve both the simulation experience, and the user experience.
+\subsection{Simulator}
+\subsubsection{Aggregate Collision Lookup}
+Currently the DIGLS Simulator uses a binary search on a morton-key sorted vector of particles for every particle which is stepping in the simulation. This lookup time could be greatly improved by using a hierarchical structure such as an octree or BVH. By creating a tree structure to contain the aggregate particles, it becomes easy to determine whether or not collisions need to be calculated for a specific particle or not.
 
+\subsection{Visualizer}
+\subsubsection{Global Lighting}
+While local lighting makes a big improvement on simulation appearance, using a global lighting model would make it much easier for the user to discern small features on the aggregate structure that the local lighting model does not allow for. Shown in Figure \ref{fig:GlobalLighting} is a render of a small amount of sample data in Blender, using high quality spheres, and a global lighting model. With a global lighting model shadows cast over nooks and crevices allow the user to see those features with much more clarity.
+
+\begin{figure}[!ht]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
+    \includegraphics[width=\linewidth]{images/DLAGoodRenderSmooth.png}
+    \caption{Blender Render of a partial DLA simulation with global lighting effects.}
+    \label{fig:GlobalLighting}
+    \end{figure}
+
+\subsubsection{Depth Fog}
+Another option to help render speeds, and to further improve the feeling of depth, is to add depth fog. Shown in Figure \ref{fig:BlenderFog} fog was added to the render, and now features that lie along the z axis are much easier to tell from one another. In the Blender render, the fog effects are greatly exaggerated in order to show the effect, however in the visualizer this could simply be implemented as an atmospheric haze, or other subtle effect to give the user the feeling of depth.
+
+\begin{figure}[!ht]\centering % Using \begin{figure*} makes the figure take up the entire width of the page
+    \includegraphics[width=\linewidth]{images/DLAGoodRenderSmoothLightMist.png}
+    \caption{Blender Render of a partial DLA simulation with global lighting effects and depth fog.}
+    \label{fig:BlenderFog}
+    \end{figure}
 
 
 %------------------------------------------------
 \phantomsection
 \section*{Acknowledgments} % The \section*{} command stops section numbering
-Morton Encoding code taken from [1]
+Morton Encoding code taken from \cite{Karras:2012}\\
+Salt structure example used from Anne Helmenstine's 2011 video \cite{Helmenstine:2011}
 %----------------------------------------------------------------------------------------
 %	REFERENCE LIST
 %----------------------------------------------------------------------------------------
