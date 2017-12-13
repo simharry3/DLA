@@ -90,27 +90,27 @@
 %	ARTICLE CONTENTS
 %----------------------------------------------------------------------------------------
 
-\section*{Introduction} % The \section*{} command stops section numbering
+% \section*{Introduction} % The \section*{} command stops section numbering
 
-\addcontentsline{toc}{section}{Introduction} % Adds this section to the table of contents
+% \addcontentsline{toc}{section}{Introduction} % Adds this section to the table of contents
 
 %------------------------------------------------
 
-\subsection{Features}
+\section{Features}
 
-\subsubsection{Graphics Modes}
+\subsection{Graphics Modes}
 DIGILS features two different graphics modes: Fast and Fancy. Fast graphics renders all particles as points. Aggregator particles are shown in red, and Active particles are shown in green. Fast graphics will render each particle as a sphere, complete with local lighting effects, however visualizer performance will take a significant hit with large numbers of particles.
-\subsubsection{Bounding Box}
+\subsection{Bounding Box}
 By default, a bounding box is drawn around the simulation space, in order to distinguish the simulation volume from the background. Should the user desire, this bounding box may be toggled.
 
-\subsubsection{Rotation}
+\subsection{Rotation}
 By default, DIGILS will rotate the camera around the simulation space as the simulation progresses. Should the user desire, this rotation can be toggled on and off.
 
-\subsubsection{Active Particle Display}
+\subsection{Active Particle Display}
 Active particles are not displayed by default, as this can greatly reduce visualizer performance at the beginning of a simulation should the number of particles be large. The user however may toggle the display of active particles in both Fast and Fancy graphics modes.
-\subsubsection{Morton Line Display}
+\subsection{Morton Line Display}
 With the most recent release of DIGILS, the user may toggle on or off the morton line which the simulation uses to calculate collisions. More details about this can be found in the paper titled "Visualization of Diffusion Limited Aggregation Simulations using OpenGL".
-\subsubsection{Zoom}
+\subsection{Zoom}
 Using the mouse wheel, the user may adjust the position of the camera closer or farther to the simulation center (which is calculated automatically at the beginning of visualization).
 \section{Operation}
 \subsection{Aggregator Generation}
@@ -144,6 +144,8 @@ Several options are available to the user from the visualizer, as displayed at t
     \item[F2] Toggle bounding box to cover the simulation space.\\ (Default: off)
     \item[F3] Toggle rotation of camera around simulation.\\ (Default: off)
     \item[F4] Toggle visibility of active particles in simulation.\\ (Default: on)
+    \item[F5] Toggle visibility of Morton encoding line.\\ (Default: off)
+    \item[Scroll] Move camera closer to or farther from simulation.\\
 \end{description}
 %------------------------------------------------
 
@@ -151,14 +153,14 @@ Several options are available to the user from the visualizer, as displayed at t
 
 %------------------------------------------------
 \phantomsection
-\section*{Acknowledgments} % The \section*{} command stops section numbering
-Morton Encoding code taken from [1]
-%----------------------------------------------------------------------------------------
+% \section*{Acknowledgments} % The \section*{} command stops section numbering
+% Morton Encoding code taken from [1]
+% %----------------------------------------------------------------------------------------
 %	REFERENCE LIST
-%----------------------------------------------------------------------------------------
-\phantomsection
-\bibliographystyle{unsrt}
-\bibliography{references}
+% %----------------------------------------------------------------------------------------
+% \phantomsection
+% \bibliographystyle{unsrt}
+% \bibliography{references}
 
 %----------------------------------------------------------------------------------------
 
